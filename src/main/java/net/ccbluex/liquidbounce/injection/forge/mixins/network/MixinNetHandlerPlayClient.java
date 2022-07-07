@@ -9,7 +9,6 @@ import io.netty.buffer.Unpooled;
 import net.ccbluex.liquidbounce.LiquidBounce;
 import net.ccbluex.liquidbounce.event.PacketEvent;
 import net.ccbluex.liquidbounce.features.module.modules.misc.AntiExploit;
-import net.ccbluex.liquidbounce.features.module.modules.misc.SilentDisconnect;
 import net.ccbluex.liquidbounce.features.special.AntiForge;
 import net.ccbluex.liquidbounce.utils.ClientUtils;
 import net.minecraft.client.ClientBrandRetriever;
@@ -154,12 +153,6 @@ public abstract class MixinNetHandlerPlayClient {
 
     @Inject(method = "onDisconnect", at = @At("HEAD"), cancellable = true)
     private void onDisconnect(IChatComponent reason, CallbackInfo callbackInfo) {
-        if(gameController.theWorld != null && gameController.thePlayer != null
-                && LiquidBounce.moduleManager.getModule(SilentDisconnect.class).getState()) {
-            ClientUtils.INSTANCE.displayAlert(I18n.format("disconnect.lost") + ":");
-            ClientUtils.INSTANCE.displayChatMessage(reason.getFormattedText());
-            callbackInfo.cancel();
-        }
     }
 
     @ModifyArg(method={"handleJoinGame", "handleRespawn"}, at=@At(value="INVOKE", target="Lnet/minecraft/client/Minecraft;displayGuiScreen(Lnet/minecraft/client/gui/GuiScreen;)V"))
