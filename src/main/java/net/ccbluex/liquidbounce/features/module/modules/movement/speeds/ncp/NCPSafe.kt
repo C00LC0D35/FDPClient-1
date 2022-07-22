@@ -10,10 +10,10 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.potion.Potion
 
 class NCPSafe : SpeedMode("NCPSafe") {
-  
+
     private var mspeed = 0.0
     private var justJumped = false
-  
+
     override fun onEnable() {
         mc.timer.timerSpeed = 1.0865f
         super.onEnable()
@@ -30,23 +30,23 @@ class NCPSafe : SpeedMode("NCPSafe") {
             if (mc.thePlayer.onGround) {
                 mc.thePlayer.jump()
                 mc.thePlayer.motionY = 0.42
-              
+
                 mspeed += 0.2
                 if (mspeed < 0.4873) {
-                  mspeed = 0.4873
+                    mspeed = 0.4873
                 }
-                
+
                 if(mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                  mspeed += 0.02 + mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() * 0.02
+                    mspeed += 0.02 + mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() * 0.02
                 }
-                
+
                 justJumped = true
             } else {
                 if (justJumped) {
-                  mspeed *= 0.66
-                  justJumped = false
+                    mspeed *= 0.66
+                    justJumped = false
                 } else {
-                  mspeed -= mspeed / 159
+                    mspeed -= mspeed / 159
                 }
             }
             MovementUtils.strafe(mspeed.toFloat())
@@ -55,5 +55,4 @@ class NCPSafe : SpeedMode("NCPSafe") {
             mc.thePlayer.motionZ = 0.0
         }
     }
-}	
-
+}

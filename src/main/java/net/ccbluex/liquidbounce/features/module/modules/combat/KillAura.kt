@@ -108,6 +108,7 @@ class KillAura : Module() {
     private val discoverRangeValue = FloatValue("DiscoverRange", 6f, 0f, 15f)
 
     private val blinkCheck = BoolValue("BlinkCheck", true)
+    private val noScaffValue = BoolValue("NoScaffold", true)
 
     // Modes
     private val priorityValue = ListValue(
@@ -138,7 +139,7 @@ class KillAura : Module() {
     }.displayable { autoBlockValue.equals("Range") }
     private val autoBlockPacketValue = ListValue(
         "AutoBlockPacket",
-        arrayOf("AfterTick", "AfterAttack", "Vanilla"),
+        arrayOf("AfterTick", "AfterAttack", "Vanilla", "Hypixel"),
         "AfterTick"
     ).displayable { autoBlockValue.equals("Range") }
     private val interactAutoBlockValue =
@@ -234,8 +235,6 @@ class KillAura : Module() {
     private val limitedMultiTargetsValue =
         IntegerValue("LimitedMultiTargets", 0, 0, 50).displayable { targetModeValue.equals("Multi") }
 
-    // idk
-    private val noScaffValue = BoolValue("NoScaffold", true)
 
     // Visuals
     private val markValue = ListValue("Mark", arrayOf("Liquid", "FDP", "Block", "Jello", "Sims", "None"), "FDP")
@@ -334,6 +333,14 @@ class KillAura : Module() {
             (attackTimingValue.equals("Post") && event.eventState == EventState.POST)
         ) {
             runAttackLoop()
+        }
+        
+        if (autoBlockValue.equals("Range") && event.eventState == EventState.POST && autoBlockPacketValue.equals("Hypixel")) {
+             if (mc.thePlayer.swingProgressInt == 1) {
+                mc.netHandler.addToSendQueue(C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN))
+            } else if (mc.thePlayer.swingProgressInt == 2) {
+                mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(mc.thePlayer.getHeldItem()))
+            }
         }
 
         if (blockTimingValue.equals("Both") ||
