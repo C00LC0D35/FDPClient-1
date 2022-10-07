@@ -42,8 +42,6 @@ class Scafold : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side.Vert
     private fun drawLB() {
         val info = LanguageManager.getAndFormat("ui.scaffold.blocks", blocksAmount)
         val slot = InventoryUtils.findAutoBlockBlock()
-        val height = event.scaledResolution.scaledHeight
-        val width = event.scaledResolution.scaledWidth
         var stack = barrier
         if (slot != -1) {
             if (mc.thePlayer.inventory.getCurrentItem() != null) {
@@ -61,9 +59,9 @@ class Scafold : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side.Vert
         }
     GlStateManager.pushMatrix()
     RenderHelper.enableGUIStandardItemLighting()
-    mc.renderItem.renderItemIntoGUI(stack, width / 2 - mc.fontRendererObj.getStringWidth(info), (height * 0.6 - mc.fontRendererObj.FONT_HEIGHT * 0.5).toInt())
+    mc.renderItem.renderItemIntoGUI(stack, 0 - mc.fontRendererObj.getStringWidth(info), (0 - mc.fontRendererObj.FONT_HEIGHT * 0.5).toInt())
     RenderHelper.disableStandardItemLighting()
-    mc.fontRendererObj.drawCenteredString(info, width / 2f, height * 0.6f, Color.WHITE.rgb, false)
+    mc.fontRendererObj.drawCenteredString(info, 0, 0, Color.WHITE.rgb, false)
     GlStateManager.popMatrix()
     }
 
