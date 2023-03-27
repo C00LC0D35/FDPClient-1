@@ -184,6 +184,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
     private var calcScaleY = 0F
     private var calcTranslateX = 0F
     private var calcTranslateY = 0F
+    
+    private var renderPosX = 0f
+    private var renderPosy = 0f
 
     fun updateData(_a: Float, _b: Float, _c: Float, _d: Float) {
         calcTranslateX = _a
@@ -227,7 +230,40 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 return getTBorder()
             }
         }
+        
+        val entityLiving = prevTarget as EntityLivingBase
 
+        
+        if (RenderUtils.isInViewFrustrum(entityLiving)) {
+            val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
+            val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
+            val renderManager = mc.renderManager
+            val timer = mc.timer
+            val bb = entityLiving.entityBoundingBox
+                .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
+                .offset(
+                    entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
+                    entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * timer.renderPartialTicks,
+                    entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * timer.renderPartialTicks
+                )
+                .offset(-renderManager.renderPosX, -renderManager.renderPosY, -renderManager.renderPosZ)
+            val bbx = (bb.minX + bb.maxX) / 2
+            val bby = (bb.minY + bb.maxY) / 2
+            val bbz = (bb.minZ + bb.maxZ) / 2
+            val screenPos = WorldToScreen.worldToScreen(
+                Vector3f(
+                    bbx.toFloat(), bby.toFloat(), bbz.toFloat()
+                ), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight
+            )
+            renderPosX += (screenPos.x.toFloat() - renderPosX) / 3
+            renderPosY += (screenPos.y.toFloat() - renderPosY) / 3
+        } else {
+            renderPosX += (renderX.toFloat() - renderPosX) / 3
+            renderPosY += (renderY.toFloat() - renderPosY) / 3
+        }
+        
+        GL11.glTranslated(-renderX, -renderY, 0.0)
+        GL11.glTranslated(renderPosX.toDouble(), renderPosY.toDouble(), 0.0)
 
 
         if (hpEaseAnimation != null) {
@@ -290,10 +326,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             GL11.glPushMatrix()
             GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
             GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
-        }
-
-        if (fadeValue.get())
             GL11.glPopMatrix()
+        }
 
         GlStateManager.resetColor()
 
