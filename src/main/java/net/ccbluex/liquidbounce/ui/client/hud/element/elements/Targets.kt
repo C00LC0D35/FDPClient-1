@@ -31,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.Entity
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
+import org.lwjgl.util.vector.Vector3f
 import java.awt.Color
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -185,8 +186,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
     private var calcTranslateX = 0F
     private var calcTranslateY = 0F
     
-    private var renderPosX = 0f
-    private var renderPosy = 0f
+    var renderPosX = 0f
+    var renderPosy = 0f
 
     fun updateData(_a: Float, _b: Float, _c: Float, _d: Float) {
         calcTranslateX = _a
@@ -250,11 +251,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bbx = (bb.minX + bb.maxX) / 2
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
-            val screenPos = WorldToScreen.worldToScreen(
-                Vector3f(
-                    bbx.toFloat(), bby.toFloat(), bbz.toFloat()
-                ), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight
-            )
+            val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
             renderPosX += (screenPos.x.toFloat() - renderPosX) / 3
             renderPosY += (screenPos.y.toFloat() - renderPosY) / 3
         } else {
