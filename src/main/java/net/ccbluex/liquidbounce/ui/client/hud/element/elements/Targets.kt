@@ -187,7 +187,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
     private var calcTranslateY = 0F
     
     var renderPosX = 0f
-    var renderPosy = 0f
+    var renderPosY = 0f
 
     fun updateData(_a: Float, _b: Float, _c: Float, _d: Float) {
         calcTranslateX = _a
