@@ -292,6 +292,8 @@ public class ClickGui extends GuiScreen {
     @Override
     public void onGuiClosed() {
         LiquidBounce.fileManager.saveConfig(modernuiLaunchOption.getClickGuiConfig());
+        slide = 0;
+	progress = 0;
     }
 
     @Override
