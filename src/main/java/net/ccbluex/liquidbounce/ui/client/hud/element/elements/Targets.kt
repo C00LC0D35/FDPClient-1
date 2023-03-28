@@ -212,6 +212,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (mc.currentScreen is GuiHudDesigner) {
             target = mc.thePlayer
         }
+        
         if (target != null) {
             prevTarget = target
         }
@@ -237,8 +238,10 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         
         val entityLiving = prevTarget as EntityLivingBase
         
-        if (RenderUtils.isInViewFrustrum(entityLiving) && followTH.get()) {
-            entityRenderer.setupCameraTransform(timer.renderPartialTicks, 0)
+        val followTarget = followTH.get() && !(mc.currentScreen is GuiHudDesigner)
+        
+        if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
+            EntityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val renderManager = mc.renderManager
@@ -262,7 +265,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             renderPosY += (renderY - renderPosY) / 3
         }
         
-        if (followTH.get()) {
+        if (followTarget) {
             GL11.glTranslated(-renderX, -renderY, 0.0)
             GL11.glTranslated(renderPosX, renderPosY, 0.0)
         } else {
