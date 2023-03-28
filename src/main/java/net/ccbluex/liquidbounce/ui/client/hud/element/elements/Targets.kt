@@ -236,6 +236,24 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         
         val entityLiving = prevTarget as EntityLivingBase
 
+        if (followTH.get()) {
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT)
+            GL11.glEnable(GL11.GL_BLEND)
+            GL11.glDisable(GL11.GL_TEXTURE_2D)
+            GL11.glDisable(GL11.GL_DEPTH_TEST)
+            GL11.glMatrixMode(GL11.GL_PROJECTION)
+            GL11.glPushMatrix()
+            GL11.glLoadIdentity()
+            GL11.glOrtho(0.0, mc.displayWidth.toDouble(), mc.displayHeight.toDouble(), 0.0, -1.0, 1.0)
+            GL11.glMatrixMode(GL11.GL_MODELVIEW)
+            GL11.glPushMatrix()
+            GL11.glLoadIdentity()
+            GL11.glDisable(GL11.GL_DEPTH_TEST)
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+            GlStateManager.enableTexture2D()
+            GlStateManager.depthMask(true)
+            GL11.glLineWidth(1.0f)
+        }
         
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTH.get()) {
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
@@ -264,6 +282,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (followTH.get()) {
             GL11.glTranslated(-renderX, -renderY, 0.0)
             GL11.glTranslated(renderPosX.toDouble(), renderPosY.toDouble(), 0.0)
+        } else {
+            renderPosX = renderX
+            renderPosY = renderY
         }
 
 
@@ -289,7 +310,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             }
             "slide" -> {
                 val percent = EaseUtils.easeInQuint(1.0 - easedPersent)
-                val xAxis = ScaledResolution(mc).scaledWidth - renderX
+                val xAxis = ScaledResolution(mc).scaledWidth - renderPosX
                 GL11.glTranslated(xAxis * percent, 0.0, 0.0)
             }
         }
@@ -396,11 +417,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         font.drawString("${getHealth(target).roundToInt()} ❤", 19, 9, color.rgb)
         GL11.glPopMatrix()
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -409,7 +430,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -418,7 +439,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             })
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -436,11 +457,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         font.drawString("❤", 33, 30, Color.RED.rgb)
         font.drawString(decimalFormat.format(getHealth(target)), 43, 30, Color.WHITE.rgb)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -449,7 +470,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -458,7 +479,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             })
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -510,11 +531,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 36, 24, 0xffffff)
         }
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -524,7 +545,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -534,7 +555,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             })
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -801,29 +822,29 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         RenderUtils.drawRoundedCornerRect(0f, 0f, 50f + additionalWidth, 50f, 7f, Color(0, 0, 0, 130).rgb)
         //RenderUtils.drawShadow(2f, 2f, 48f + additionalWidth, 48f)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
                 }
-                RenderUtils.drawRect(2f, 2f, 48f + additionalWidth, 48f, Color(0, 0, 0, 130).rgb)
+                RenderUtils.drawRoundedCornerRect(0f, 0f, 50f + additionalWidth, 50f, 7f, Color(0, 0, 0, 130).rgb)
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
                 }
-                RenderUtils.drawRect(2f, 2f, 48f + additionalWidth, 48f, Color(0, 0, 0, 130).rgb)
+                RenderUtils.drawRoundedCornerRect(0f, 0f, 50f + additionalWidth, 50f, 7f, Color(0, 0, 0, 130).rgb)
                 GL11.glPopMatrix()
             })
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
 
         // circle player avatar
@@ -933,11 +954,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
 
         mc.fontRendererObj.drawStringWithShadow(target.name.toString(), 36F, 22F, 0xFFFFFF)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -946,7 +967,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -955,7 +976,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             })
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -1175,12 +1196,12 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         RenderUtils.drawRect(40f, yPos, 40 + (easingHP / target.maxHealth) * additionalWidth, yPos + 4, Color.GREEN.rgb)
         RenderUtils.drawRect(40f, yPos + 9, 40 + (target.totalArmorValue / 20F) * additionalWidth, yPos + 13, Color(77, 128, 255).rgb)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
 
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1190,7 +1211,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1201,7 +1222,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             })
 
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -1238,11 +1259,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         val c4 = ColorUtils.interpolateColorsBackAndForth(17, 180, Color(230, 140, 255, 205), Color(101, 208, 252, 205), true);
 
         // glow
-        GL11.glTranslated(-renderX * scale, -renderY * scale, 0.0)
+        GL11.glTranslated(-renderPosX * scale, -renderPosY * scale, 0.0)
         GL11.glPushMatrix()
-        ShadowUtils.shadow(8F, { GL11.glPushMatrix(); GL11.glTranslated(renderX * scale, renderY * scale, 0.0); RoundedUtil.drawGradientRound(0f * scale, 5f * scale, 59f + additionalWidth.toFloat() * scale, 45f * scale, 6F, c1, c2, c3, c4); GL11.glPopMatrix(); }, {})
+        ShadowUtils.shadow(8F, { GL11.glPushMatrix(); GL11.glTranslated(renderPosX * scale, renderPosY * scale, 0.0); RoundedUtil.drawGradientRound(0f * scale, 5f * scale, 59f + additionalWidth.toFloat() * scale, 45f * scale, 6F, c1, c2, c3, c4); GL11.glPopMatrix(); }, {})
         GL11.glPopMatrix()
-        GL11.glTranslated(renderX * scale, renderY * scale, 0.0)
+        GL11.glTranslated(renderPosX * scale, renderPosY * scale, 0.0)
 
         // background
         RoundedUtil.drawGradientRound(0f, 5f, 59f + additionalWidth.toFloat(), 45f, 6F, c1, c2, c3, c4);
@@ -1277,8 +1298,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         val reColorBar = Color(barColor.red / 255.0F, barColor.green / 255.0F, barColor.blue / 255.0F, barColor.alpha / 255.0F * 1F)
         val reColorText = Color(1F, 1F, 1F, 1F)
 
-        val floatX = renderX.toFloat()
-        val floatY = renderY.toFloat()
+        val floatX = renderPosX.toFloat()
+        val floatY = renderPosY.toFloat()
 
         // background
         RenderUtils.drawRoundedRect(0F, 0F, tWidth, 48F, 7F, reColorBg.rgb)
@@ -1348,7 +1369,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         Stencil.dispose()
 
         GL11.glScalef(1F, 1F, 1F)
-        GL11.glTranslated(renderX, renderY, 0.0)
+        GL11.glTranslated(renderPosX, renderPosY, 0.0)
     }
 
     private fun drawChillLite(entity: EntityPlayer) {
@@ -1383,7 +1404,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
 
         // name + health
         Fonts.font40.drawString(name, 38F, 6F, getColor(-1).rgb)
-        numberRenderer.renderChar(health, renderX.toFloat(), renderY.toFloat(), 38F, 17F, 0f,0f, false, chillFontSpeed.get(), getColor(-1).rgb)
+        numberRenderer.renderChar(health, renderPosX.toFloat(), renderPosY.toFloat(), 38F, 17F, 0f,0f, false, chillFontSpeed.get(), getColor(-1).rgb)
 
     }
 
@@ -1787,11 +1808,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         GlStateManager.resetColor()
         font.drawString(healthName, 10F + barWidth, 41F, getColor(-1).rgb)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1805,7 +1826,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1822,7 +1843,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             })
 
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
     }
 
@@ -1843,11 +1864,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
 
         RenderUtils.drawRect(0F, 32F, (easingHealth / entity.maxHealth.toFloat()).coerceIn(0F, entity.maxHealth.toFloat()) * (length + 32F), 36F, barColor.rgb)
         if (shadowValue.get()) {
-            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(-renderPosX, -renderPosY, 0.0)
             GL11.glPushMatrix()
             ShadowUtils.shadow(shadowStrength.get(), {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1860,7 +1881,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 GL11.glPopMatrix()
             }, {
                 GL11.glPushMatrix()
-                GL11.glTranslated(renderX, renderY, 0.0)
+                GL11.glTranslated(renderPosX, renderPosY, 0.0)
                 if (fadeValue.get()) {
                     GL11.glTranslatef(calcTranslateX, calcTranslateY, 0F)
                     GL11.glScalef(1F - calcScaleX, 1F - calcScaleY, 1F - calcScaleX)
@@ -1874,7 +1895,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             })
 
             GL11.glPopMatrix()
-            GL11.glTranslated(renderX, renderY, 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         }
 
     }
