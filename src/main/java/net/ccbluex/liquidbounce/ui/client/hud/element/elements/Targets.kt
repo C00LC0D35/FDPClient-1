@@ -188,8 +188,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
     private var calcTranslateX = 0F
     private var calcTranslateY = 0F
     
-    var renderPosX = 0f
-    var renderPosY = 0f
+    var renderPosX = 0.0
+    var renderPosY = 0.0
 
     fun updateData(_a: Float, _b: Float, _c: Float, _d: Float) {
         calcTranslateX = _a
@@ -272,16 +272,16 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
             val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
-            renderPosX += (screenPos.x.toFloat() - renderPosX) / 3
-            renderPosY += (screenPos.y.toFloat() - renderPosY) / 3
+            renderPosX += (screenPos.x.toDouble() - renderPosX) / 3
+            renderPosY += (screenPos.y.toDouble() - renderPosY) / 3
         } else {
-            renderPosX += (renderX.toFloat() - renderPosX) / 3
-            renderPosY += (renderY.toFloat() - renderPosY) / 3
+            renderPosX += (renderX - renderPosX) / 3
+            renderPosY += (renderY - renderPosY) / 3
         }
         
         if (followTH.get()) {
             GL11.glTranslated(-renderX, -renderY, 0.0)
-            GL11.glTranslated(renderPosX.toDouble(), renderPosY.toDouble(), 0.0)
+            GL11.glTranslated(renderPosX, renderPosY, 0.0)
         } else {
             renderPosX = renderX
             renderPosY = renderY
