@@ -241,6 +241,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         
         val followTarget = followTH.get() && !(mc.currentScreen is GuiHudDesigner)
         
+        if (followTarget)
+            GL11.glPushMatrix()
+        
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
             val timer = mc.timer
             val renderManager = mc.renderManager
@@ -275,6 +278,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bbz = (bb.minZ + bb.maxZ) / 2
             
             val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
+            
+            val RposX = screenPos[0] / 4
+            val RposY = screenPos[1] / 4
             
             ClientUtils.displayChatMessage(screenPos[0].toString())
             ClientUtils.displayChatMessage(screenPos[1].toString())
@@ -401,6 +407,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             "exhibitionold" -> drawExhibitionOld(prevTarget!! as EntityPlayer)
             "bar" -> drawBar(prevTarget!!)
         }
+        
+        if (followTarget)
+            GL11.glPopMatrix()
         
 
         return getTBorder()
