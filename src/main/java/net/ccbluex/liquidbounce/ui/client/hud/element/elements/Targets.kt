@@ -248,7 +248,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
             val timer = mc.timer
             val renderManager = mc.renderManager
-            //mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+            mc.entityRenderer.setupOverlayRendering()
             
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
