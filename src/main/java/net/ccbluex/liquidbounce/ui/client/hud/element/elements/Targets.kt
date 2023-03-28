@@ -276,12 +276,12 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             
             val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
             
-            ClientUtils.displayChatMessage(screenPos.x.toString())
-            ClientUtils.displayChatMessage(screenPos.y.toString())
+            ClientUtils.displayChatMessage(screenPos[0].toString())
+            ClientUtils.displayChatMessage(screenPos[1].toString())
 
             
-            renderPosX += (screenPos.x.toDouble() - renderPosX) / 3
-            renderPosY += (screenPos.y.toDouble() - renderPosY) / 3
+            renderPosX += (screenPos[0].toDouble() - renderPosX) / 3
+            renderPosY += (screenPos[1].toDouble() - renderPosY) / 3
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
