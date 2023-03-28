@@ -393,6 +393,15 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             "exhibitionold" -> drawExhibitionOld(prevTarget!! as EntityPlayer)
             "bar" -> drawBar(prevTarget!!)
         }
+        
+        if (followTH.get()) {
+            GL11.glEnable(GL11.GL_DEPTH_TEST)
+            GL11.glMatrixMode(GL11.GL_PROJECTION)
+            GL11.glPopMatrix()
+            GL11.glMatrixMode(GL11.GL_MODELVIEW)
+            GL11.glPopMatrix()
+            GL11.glPopAttrib()
+        }
 
         return getTBorder()
 
