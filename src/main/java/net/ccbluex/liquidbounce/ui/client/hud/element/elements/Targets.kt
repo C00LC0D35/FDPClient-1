@@ -241,11 +241,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         val followTarget = followTH.get() && !(mc.currentScreen is GuiHudDesigner)
         
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
+            val timer = mc.timer
+            val renderManager = mc.renderManager
             /* mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
-            val renderManager = mc.renderManager
-            val timer = mc.timer
             val bb = entityLiving.entityBoundingBox
                 .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
                 .offset(
@@ -274,8 +274,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             
             val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
             
-            renderPosX += (screenPos.x.toDouble() - renderPosX) / 3
-            renderPosY += (screenPos.y.toDouble() - renderPosY) / 3
+            renderPosX += (screenPos[0].toDouble() - renderPosX) / 3
+            renderPosY += (screenPos[1].toDouble() - renderPosY) / 3
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
