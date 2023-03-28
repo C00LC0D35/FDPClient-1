@@ -26,6 +26,7 @@ import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderHelper
+import net.minecraft.client.renderer.EntityRenderer
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.Entity
@@ -235,27 +236,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         }
         
         val entityLiving = prevTarget as EntityLivingBase
-
-        if (followTH.get()) {
-            GL11.glPushAttrib(GL11.GL_ENABLE_BIT)
-            GL11.glEnable(GL11.GL_BLEND)
-            GL11.glDisable(GL11.GL_TEXTURE_2D)
-            GL11.glDisable(GL11.GL_DEPTH_TEST)
-            GL11.glMatrixMode(GL11.GL_PROJECTION)
-            GL11.glPushMatrix()
-            GL11.glLoadIdentity()
-            GL11.glOrtho(0.0, mc.displayWidth.toDouble(), mc.displayHeight.toDouble(), 0.0, -1.0, 1.0)
-            GL11.glMatrixMode(GL11.GL_MODELVIEW)
-            GL11.glPushMatrix()
-            GL11.glLoadIdentity()
-            GL11.glDisable(GL11.GL_DEPTH_TEST)
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
-            GlStateManager.enableTexture2D()
-            GlStateManager.depthMask(true)
-            GL11.glLineWidth(1.0f)
-        }
         
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTH.get()) {
+            entityRenderer.setupCameraTransform(timer.renderPartialTicks, 0)
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val renderManager = mc.renderManager
@@ -394,14 +377,6 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             "bar" -> drawBar(prevTarget!!)
         }
         
-        if (followTH.get()) {
-            GL11.glEnable(GL11.GL_DEPTH_TEST)
-            GL11.glMatrixMode(GL11.GL_PROJECTION)
-            GL11.glPopMatrix()
-            GL11.glMatrixMode(GL11.GL_MODELVIEW)
-            GL11.glPopMatrix()
-            GL11.glPopAttrib()
-        }
 
         return getTBorder()
 
