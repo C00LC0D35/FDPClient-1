@@ -279,8 +279,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             ClientUtils.displayChatMessage(screenPos.y.toString())
 
             
-            renderPosX += (screenPos[0].toDouble() - renderPosX) / 3
-            renderPosY += (screenPos[1].toDouble() - renderPosY) / 3
+            renderPosX += (screenPos.x.toDouble() - renderPosX) / 3
+            renderPosY += (screenPos.y.toDouble() - renderPosY) / 3
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
