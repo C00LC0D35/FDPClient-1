@@ -34,6 +34,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 import org.lwjgl.util.vector.Vector3f
+import org.lwjgl.util.vector.Vector4f
 import java.awt.Color
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -248,8 +249,6 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
             val timer = mc.timer
             val renderManager = mc.renderManager
-            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
-            mc.entityRenderer.setupOverlayRendering()
             
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
@@ -265,6 +264,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
             
+            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+            mc.entityRenderer.setupOverlayRendering()
+            
             if (followMode.get()) {
                 val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
                 val RposX = screenPos.x
@@ -278,9 +280,10 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 renderPosY += (RposY.toDouble() - renderPosY) / 3
             } else {
                 val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
+                val vector1 = Vector4f(screenPos[0].toFloat(),screenPos[1].toFloat(), screenPos[2].toFloat(),0f)  
 
-                val RposX = screenPos[0] 
-                val RposY = screenPos[1]
+                val RposX = vector1.x.toDouble()
+                val RposY = vector1.y.toDouble()
 
                 ClientUtils.displayChatMessage(RposX.toString())
                 ClientUtils.displayChatMessage(RposY.toString())
