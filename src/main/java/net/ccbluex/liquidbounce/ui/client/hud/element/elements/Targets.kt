@@ -241,7 +241,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         val followTarget = followTH.get() && !(mc.currentScreen is GuiHudDesigner)
         
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
-            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+            /* mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val renderManager = mc.renderManager
@@ -258,6 +258,22 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
             val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
+            */ 
+            
+            val bb = entityLiving.entityBoundingBox
+                .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
+                .offset(
+                    entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
+                    entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * timer.renderPartialTicks,
+                    entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * timer.renderPartialTicks
+                )
+                .offset(-renderManager.renderPosX, -renderManager.renderPosY, -renderManager.renderPosZ)
+            val bbx = (bb.minX + bb.maxX) / 2
+            val bby = (bb.minY + bb.maxY) / 2
+            val bbz = (bb.minZ + bb.maxZ) / 2
+            
+            val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
+            
             renderPosX += (screenPos.x.toDouble() - renderPosX) / 3
             renderPosY += (screenPos.y.toDouble() - renderPosY) / 3
         } else {
