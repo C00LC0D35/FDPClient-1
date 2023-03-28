@@ -244,7 +244,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
             val timer = mc.timer
             val renderManager = mc.renderManager
-            /* mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val bb = entityLiving.entityBoundingBox
@@ -259,9 +259,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
             val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
-            */ 
             
-            val bb = entityLiving.entityBoundingBox
+            
+            /* val bb = entityLiving.entityBoundingBox
                 .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
                 .offset(
                     entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
@@ -273,11 +273,11 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
             
-            val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
+            val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz) */
             
-            ClientUtils.displayChatMessage(screenPos[0].toString())
-            ClientUtils.displayChatMessage(screenPos[1].toString())
-            ClientUtils.displayChatMessage(screenPos[2].toString())
+            ClientUtils.displayChatMessage(screenPos.x.toString())
+            ClientUtils.displayChatMessage(screenPos.y.toString())
+            ClientUtils.displayChatMessage(screenPos.z.toString())
             
             renderPosX += (screenPos[0].toDouble() - renderPosX) / 3
             renderPosY += (screenPos[1].toDouble() - renderPosY) / 3
