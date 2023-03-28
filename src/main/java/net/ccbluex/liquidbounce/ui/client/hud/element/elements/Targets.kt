@@ -49,6 +49,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
 
     private var Health: Float = 0F
     private var EndingTarget: Entity? = null
+    
+    private val followTH = BoolValue("FollowTargetHud", true)
 
     private val fontValue = FontValue("Font", Fonts.font40)
 
@@ -235,7 +237,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         val entityLiving = prevTarget as EntityLivingBase
 
         
-        if (RenderUtils.isInViewFrustrum(entityLiving)) {
+        if (RenderUtils.isInViewFrustrum(entityLiving) && followTH.get()) {
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val renderManager = mc.renderManager
@@ -259,8 +261,10 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             renderPosY += (renderY.toFloat() - renderPosY) / 3
         }
         
-        GL11.glTranslated(-renderX, -renderY, 0.0)
-        GL11.glTranslated(renderPosX.toDouble(), renderPosY.toDouble(), 0.0)
+        if (followTH.get()) {
+            GL11.glTranslated(-renderX, -renderY, 0.0)
+            GL11.glTranslated(renderPosX.toDouble(), renderPosY.toDouble(), 0.0)
+        }
 
 
         if (hpEaseAnimation != null) {
