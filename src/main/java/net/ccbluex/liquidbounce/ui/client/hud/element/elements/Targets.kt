@@ -53,6 +53,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
     private var EndingTarget: Entity? = null
     
     private val followTH = BoolValue("FollowTargetHud", true)
+    private val followMode = BoolValue("TransformMode", true)
 
     private val fontValue = FontValue("Font", Fonts.font40)
 
@@ -248,7 +249,7 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val timer = mc.timer
             val renderManager = mc.renderManager
             //mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
-            /*
+            
             val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
             val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
             val bb = entityLiving.entityBoundingBox
@@ -262,32 +263,31 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bbx = (bb.minX + bb.maxX) / 2
             val bby = (bb.minY + bb.maxY) / 2
             val bbz = (bb.minZ + bb.maxZ) / 2
-            val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
-            */
             
-            val bb = entityLiving.entityBoundingBox
-                .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
-                .offset(
-                    entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
-                    entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * timer.renderPartialTicks,
-                    entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * timer.renderPartialTicks
-                )
-                .offset(-renderManager.renderPosX, -renderManager.renderPosY, -renderManager.renderPosZ)
-            val bbx = (bb.minX + bb.maxX) / 2
-            val bby = (bb.minY + bb.maxY) / 2
-            val bbz = (bb.minZ + bb.maxZ) / 2
-            
-            val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
-            
-            val RposX = screenPos[0] / 4
-            val RposY = screenPos[1] / 4
-            
-            ClientUtils.displayChatMessage(screenPos[0].toString())
-            ClientUtils.displayChatMessage(screenPos[1].toString())
+            if (followMode.get()) {
+                val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
+                val RposX = screenPos.x
+                val RposY = screenPos.y 
+                
+                ClientUtils.displayChatMessage(RposX.toString())
+                ClientUtils.displayChatMessage(RposY.toString())
 
-            
-            renderPosX += (screenPos[0].toDouble() - renderPosX) / 3
-            renderPosY += (screenPos[1].toDouble() - renderPosY) / 3
+
+                renderPosX += (RposX.toDouble() - renderPosX) / 3
+                renderPosY += (RposY.toDouble() - renderPosY) / 3
+            } else {
+                val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
+
+                val RposX = screenPos[0] / 4
+                val RposY = screenPos[1] / 4
+
+                ClientUtils.displayChatMessage(RposX.toString())
+                ClientUtils.displayChatMessage(RposY.toString())
+
+
+                renderPosX += (RposX.toDouble() - renderPosX) / 3
+                renderPosY += (RposY.toDouble() - renderPosY) / 3
+            }
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
