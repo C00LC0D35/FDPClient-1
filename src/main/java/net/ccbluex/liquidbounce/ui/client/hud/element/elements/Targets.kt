@@ -265,7 +265,6 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val bbz = (bb.minZ + bb.maxZ) / 2
             
             mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
-            mc.entityRenderer.setupOverlayRendering()
             
             if (followMode.get()) {
                 val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
@@ -293,6 +292,8 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 renderPosX += (RposX.toDouble() - renderPosX) / 3
                 renderPosY += (RposY.toDouble() - renderPosY) / 3
             }
+            
+            mc.entityRenderer.setupOverlayRendering()
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
