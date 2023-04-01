@@ -11,6 +11,7 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
+import net.ccbluex.liquidbounce.features.module.modules.movement.StrafeFix
 import net.ccbluex.liquidbounce.injection.access.StaticStorage
 import net.ccbluex.liquidbounce.ui.i18n.LanguageManager
 import net.ccbluex.liquidbounce.utils.*
@@ -127,6 +128,7 @@ class Scaffold : Module() {
     private val motionSpeedEnabledValue = BoolValue("MotionSpeedSet", false)
     private val motionSpeedValue = FloatValue("MotionSpeed", 0.1f, 0.05f, 1f).displayable { motionSpeedEnabledValue.get() }
     private val speedModifierValue = FloatValue("SpeedModifier", 1f, 0f, 2f)
+    private val moveFixValue = BoolValue("StrafeFix", false)
 
     // Tower
     private val towerModeValue = ListValue(
@@ -342,8 +344,8 @@ class Scaffold : Module() {
 
         mc.thePlayer.isSprinting = canSprint
         if (sprintValue.equals("Hypixel")) {
-            mc.thePlayer.motionX *= 1.19
-            mc.thePlayer.motionZ *= 1.19
+            mc.thePlayer.motionX *= 0.8
+            mc.thePlayer.motionZ *= 0.8
         }
 
         shouldGoDown = downValue.get() && GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) && blocksAmount > 1
@@ -504,6 +506,8 @@ class Scaffold : Module() {
                 delayTimer.reset()
             }
         }
+        
+        LiquidBounce.moduleManager[StrafeFix::class.java]!!.applyForceStrafe(!rotationsValue.equals("None"), moveFixValue.get())
     }
 
     private fun fakeJump() {
