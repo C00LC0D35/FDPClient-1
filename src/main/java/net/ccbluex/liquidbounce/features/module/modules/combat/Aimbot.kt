@@ -77,7 +77,7 @@ class Aimbot : Module() {
 
         val rotationCenter = RotationUtils.limitAngleChange(
             playerRot, targetRot,
-            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (centerSpeed.get() + (centerRandom.get() * Math.random() * 0.5f)) * 0.1f
+            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (centerSpeed.get() + (centerRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
         )
 
         rotationCenter.toPlayer(mc.thePlayer)
@@ -87,7 +87,7 @@ class Aimbot : Module() {
 
         val rotationEdge = RotationUtils.limitAngleChange(
             playerRot, targetRot,
-            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (edgeSpeed.get() + (edgeRandom.get() * Math.random() * 0.5f)) * 0.1f
+            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (edgeSpeed.get() + (edgeRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
         )
 
         rotationEdge.toPlayer(mc.thePlayer)
