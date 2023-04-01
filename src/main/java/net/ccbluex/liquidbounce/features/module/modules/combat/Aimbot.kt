@@ -1,7 +1,5 @@
 /*
- * FDPClient Hacked Client
- * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge by LiquidBounce.
- * https://github.com/SkidderMC/FDPClient/
+ * LiquidLite Ghost Client
  */
 package net.ccbluex.liquidbounce.features.module.modules.combat
 
@@ -19,19 +17,20 @@ import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.FloatValue
 import net.ccbluex.liquidbounce.features.value.IntegerValue
+import net.ccbluex.liquidbounce.utils.LocationCache
 import kotlin.random.Random
 
 @ModuleInfo(name = "Aimbot", category = ModuleCategory.COMBAT)
 class Aimbot : Module() {
 
     private val rangeValue = FloatValue("Range", 4.4F, 1F, 8F)
-    private val turnSpeedValue = FloatValue("TurnSpeed", 2F, 1F, 180F)
-    private val randomTurnValue = FloatValue("TurnSpeedRandomRate", 1.0F, 0F, 15F)
-    private val smoothValue = BoolValue("Smooth", false)
-    private val smoothAngleValue = IntegerValue("SmoothMinAngle", 30, 1, 180).displayable { smoothValue.get() }
+    private val playerPredictValue = FloatValue("PlayerPredictAmount", 1.2f, -2f, 3f)
+    private val opPredictValue = FloatValue("TargetPredictAmount", 1.5f, -2f, 3f)
+    private val centerSpeed = FloatValue("CenterSpeed", 10F, 1F, 100F)
+    private val centerRandom = FloatValue("CenterRandomRange", 1.0F, 0F, 15F)
+    private val edgeSpeed = FloatValue("EdgeSpeed", 20F, 1F, 100F)
+    private val edgeRandom = FloatValue("EdgeRandomRange", 1.0F, 0F, 15F)
     private val fovValue = FloatValue("FOV", 180F, 1F, 180F)
-    private val centerValue = BoolValue("Center", false)
-    private val lockValue = BoolValue("Lock", true)
     private val onClickValue = BoolValue("OnClick", false)
     private val onClickDurationValue = IntegerValue("OnClickDuration", 500, 100, 1000).displayable { onClickValue.get() }
     private val jitterValue = BoolValue("Jitter", false)
@@ -39,11 +38,17 @@ class Aimbot : Module() {
 
     private val clickTimer = MSTimer()
 
+    private var oldMouse = Rotation(0f, 0f)
+    private var newMouse = Rotation(0f, 0f)
+
     @EventTarget
     fun onStrafe(event: StrafeEvent) {
         if (mc.gameSettings.keyBindAttack.isKeyDown) {
             clickTimer.reset()
         }
+
+        oldMouse = newMouse
+        newMouse = Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
 
         if (onClickValue.get() && clickTimer.hasTimePassed(onClickDurationValue.get().toLong())) {
             return
@@ -57,26 +62,35 @@ class Aimbot : Module() {
             }
             .minByOrNull { RotationUtils.getRotationDifference(it) } ?: return
 
-        if (!lockValue.get() && RotationUtils.isFaced(entity, range.toDouble())) {
-            return
-        }
-        
-        val calcBaseSpeed = turnSpeedValue.get() + Math.random() * randomTurnValue.get() - Math.random() * randomTurnValue.get()
-        val angleDiff = RotationUtils.getRotationDifference(entity)
-        val calcPrecent = if (angleDiff >= smoothAngleValue.get() || !smoothValue.get()) { 1.0 } else { angleDiff / smoothAngleValue.get() }
+        entity.entityBoundingBox.offset((entity.posX - entity.lastTickPosX) * opPredictValue.get(),
+                                        (entity.posY - entity.lastTickPosY) * opPredictValue.get(),
+                                        (entity.posZ - entity.lastTickPosZ) * opPredictValue.get())
+        entity.entityBoundingBox.offset(mc.thePlayer.motionX * -1f * playerPredictValue.get(),
+                                        mc.thePlayer.motionY * -1f * playerPredictValue.get(),
+                                        mc.thePlayer.motionX * -1f * playerPredictValue.get())
 
-        val rotation = RotationUtils.limitAngleChange(
-            Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch),
-            if (centerValue.get()) {
-                RotationUtils.toRotation(RotationUtils.getCenter(entity.entityBoundingBox), true)
-            } else {
-                RotationUtils.searchCenter(entity.entityBoundingBox, false, false, true,
-                    false).rotation
-            },
-            (calcBaseSpeed * calcPrecent).toFloat()
+        val mouseSpeed = RotationUtils.getRotationDifference(oldMouse,  newMouse).toFloat()
+
+        var playerRot = Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+        var targetRot = RotationUtils.toRotation(RotationUtils.getCenter(entity.entityBoundingBox), true)
+        var rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
+
+        val rotationCenter = RotationUtils.limitAngleChange(
+            playerRot, targetRot,
+            (mouseSpeed / rotDiff) * mouseSpeed * (centerSpeed.get() + (centerRandom.get() * Math.random() * 0.5f)) * 0.1f
         )
 
-        rotation.toPlayer(mc.thePlayer)
+        rotationCenter.toPlayer(mc.thePlayer)
+
+        targetRot = RotationUtils.searchCenter(entity.entityBoundingBox, false, false, true, false).rotation
+        rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
+
+        val rotationEdge = RotationUtils.limitAngleChange(
+            playerRot, targetRot,
+            (mouseSpeed / rotDiff) * mouseSpeed * (edgeSpeed.get() + (edgeRandom.get() * Math.random() * 0.5f)) * 0.1f
+        )
+
+        rotationEdge.toPlayer(mc.thePlayer)
 
         if (jitterValue.get()) {
             val yaw = Random.nextBoolean()
