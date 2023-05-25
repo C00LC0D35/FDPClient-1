@@ -121,6 +121,7 @@ class KeyStroke(val key: KeyBinding, val posX: Int, val posY: Int, val width: In
             val pct = (nowTime - time) / (speed.toFloat())
             if (pct> 1) {
                 removeAble.add(time)
+                RenderUtils.drawRect(0F, 0F, width.toFloat(), height.toFloat(), ColorUtils.reAlpha(highLightColor, clickAlpha.toInt()))
                 continue
             }
             RenderUtils.drawLimitedCircle(0F, 0F, width.toFloat(), height.toFloat(), centerX, centerY, (width * 0.7F) * pct, Color(255 - ((255 - highLightColor.red) * pct).toInt(), 255 - ((255 - highLightColor.green) * pct).toInt(), 255 - ((255 - highLightColor.blue) * pct).toInt(), 255 - ((255 - clickAlpha) * pct).toInt()))
