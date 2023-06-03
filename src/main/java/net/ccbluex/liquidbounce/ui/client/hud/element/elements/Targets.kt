@@ -33,8 +33,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.Entity
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
-import org.lwjgl.util.vector.Vector3f
-import org.lwjgl.util.vector.Vector4f
+import org.lwjgl.util.vector.Vector3d
+import org.lwjgl.util.vector.Vector4d
 import java.awt.Color
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -247,53 +247,55 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             GL11.glPushMatrix()
         
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
-            val timer = mc.timer
-            val renderManager = mc.renderManager
-            
-            val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
-            val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
-            val bb = entityLiving.entityBoundingBox
+            val entity = entityLiving
+            if (RenderUtils.isInViewFrustrum(entity)) {
+                val aabb = entityLiving.entityBoundingBox
                 .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
                 .offset(
                     entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
                     entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * timer.renderPartialTicks,
                     entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * timer.renderPartialTicks
                 )
-                .offset(-renderManager.renderPosX, -renderManager.renderPosY, -renderManager.renderPosZ)
-            val bbx = (bb.minX + bb.maxX) / 2
-            val bby = (bb.minY + bb.maxY) / 2
-            val bbz = (bb.minZ + bb.maxZ) / 2
-            
-            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
-            
-            if (followMode.get()) {
-                val screenPos = WorldToScreen.worldToScreen(Vector3f(bbx.toFloat(), bby.toFloat(), bbz.toFloat()), mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight)
-                val RposX = screenPos.x
-                val RposY = screenPos.y 
-                
-                ClientUtils.displayChatMessage(RposX.toString())
-                ClientUtils.displayChatMessage(RposY.toString())
-
-
-                renderPosX += (RposX.toDouble() - renderPosX) / 3
-                renderPosY += (RposY.toDouble() - renderPosY) / 3
-            } else {
-                val screenPos = RenderUtils.convertTo2D(bbx, bby, bbz)
-                val vector1 = Vector4f(screenPos[0].toFloat(),screenPos[1].toFloat(), screenPos[2].toFloat(),0f)  
-
-                val RposX = vector1.x.toDouble()
-                val RposY = vector1.y.toDouble()
-
-                ClientUtils.displayChatMessage(RposX.toString())
-                ClientUtils.displayChatMessage(RposY.toString())
-                ClientUtils.displayChatMessage(screenPos[2].toString())
-
-
-                renderPosX += (RposX.toDouble() - renderPosX) / 3
-                renderPosY += (RposY.toDouble() - renderPosY) / 3
+                val vectors: List<*> = Arrays.asList(
+                    Vector3d(aabb.minX, aabb.minY, aabb.minZ),
+                    Vector3d(aabb.minX, aabb.maxY, aabb.minZ),
+                    Vector3d(aabb.maxX, aabb.minY, aabb.minZ),
+                    Vector3d(aabb.maxX, aabb.maxY, aabb.minZ),
+                    Vector3d(aabb.minX, aabb.minY, aabb.maxZ),
+                    Vector3d(aabb.minX, aabb.maxY, aabb.maxZ),
+                    Vector3d(aabb.maxX, aabb.minY, aabb.maxZ),
+                    Vector3d(aabb.maxX, aabb.maxY, aabb.maxZ)
+                )
+                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 0)
+                var position: Vector4d? = null
+                val var38 = vectors.iterator()
+                while (var38.hasNext()) {
+                    var vector = var38.next() as Vector3d?
+                    vector = RenderUtils.convertTo2D(vector!!.x - renderMng.viewerPosX,
+                                                     vector.y - renderMng.viewerPosY, 
+                                                     vector.z - renderMng.viewerPosZ)
+                    if (vector != null && vector.z >= 0.0 && vector.z < 1.0) {
+                        if (position == null) {
+                            position = Vector4d(vector.x, vector.y, vector.z, 0.0)
+                        }
+                        position.x = Math.min(vector.x, position.x)
+                        position.y = Math.min(vector.y, position.y)
+                        position.z = Math.max(vector.x, position.z)
+                        position.w = Math.max(vector.y, position.w)
+                    }
+                }
+                if (position != null) {
+                    entityRenderer.setupOverlayRendering()
+                    val posX = position.x
+                    val posY = position.y
+                    val endPosX = position.z
+                    val endPosY = position.w
+                }
             }
+                    
+            renderPosX += ((posX + endPosX) / 2 - renderPosX) / 3
+            renderPosY += ((posY + endPosY) / 2 - renderPosY) / 3
             
-            mc.entityRenderer.setupOverlayRendering()
         } else {
             renderPosX += (renderX - renderPosX) / 3
             renderPosY += (renderY - renderPosY) / 3
