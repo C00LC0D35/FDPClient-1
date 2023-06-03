@@ -250,11 +250,13 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
             val entity = entityLiving
             if (RenderUtils.isInViewFrustrum(entity)) {
                 val aabb = entityLiving.entityBoundingBox
+                val renderMng = mc.renderManager
+                
                 .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
                 .offset(
-                    entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * timer.renderPartialTicks,
-                    entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * timer.renderPartialTicks,
-                    entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * timer.renderPartialTicks
+                    entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * mc.timer.renderPartialTicks,
+                    entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * mc.timer.renderPartialTicks,
+                    entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * mc.timer.renderPartialTicks
                 )
                 val vectors: List<*> = Arrays.asList(
                     Vector3d(aabb.minX, aabb.minY, aabb.minZ),
@@ -285,16 +287,17 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                     }
                 }
                 if (position != null) {
-                    entityRenderer.setupOverlayRendering()
+                    mc.entityRenderer.setupOverlayRendering()
                     val posX = position.x
                     val posY = position.y
                     val endPosX = position.z
                     val endPosY = position.w
+                    
+                    renderPosX += ((posX + endPosX) / 2 - renderPosX) / 3
+                    renderPosY += ((posY + endPosY) / 2 - renderPosY) / 3   
                 }
             }
-                    
-            renderPosX += ((posX + endPosX) / 2 - renderPosX) / 3
-            renderPosY += ((posY + endPosY) / 2 - renderPosY) / 3
+                   
             
         } else {
             renderPosX += (renderX - renderPosX) / 3
