@@ -271,10 +271,10 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 var position: Vector4d? = null
                 val var38 = vectors.iterator()
                 while (var38.hasNext()) {
-                    var vector = var38.next() as Vector3d?
-                    vector = RenderUtils.convertTo2D(vector?.x - renderMng.viewerPosX,
-                                                     vector?.y - renderMng.viewerPosY, 
-                                                     vector?.z - renderMng.viewerPosZ)
+                    var vectorE = var38.next() as Vector3d?
+                    vector = RenderUtils.convertTo2D(vectorE.x - renderMng.viewerPosX,
+                                                     vectorE.y - renderMng.viewerPosY, 
+                                                     vectorE.z - renderMng.viewerPosZ)
                     if (vector != null && vector.z >= 0.0 && vector.z < 1.0) {
                         if (position == null) {
                             position = Vector4d(vector.x, vector.y, vector.z, 0.0)
