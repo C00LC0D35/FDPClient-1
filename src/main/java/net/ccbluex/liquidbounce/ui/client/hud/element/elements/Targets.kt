@@ -249,15 +249,14 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
         if (RenderUtils.isInViewFrustrum(entityLiving) && followTarget) {
             val entity = entityLiving
             if (RenderUtils.isInViewFrustrum(entity)) {
-                val aabb = entityLiving.entityBoundingBox
-                val renderMng = mc.renderManager
-                
-                .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
+                val aabb = entityLiving.entityBoundingBox .offset(-entityLiving.posX, -entityLiving.posY, -entityLiving.posZ)
                 .offset(
                     entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * mc.timer.renderPartialTicks,
                     entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * mc.timer.renderPartialTicks,
                     entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * mc.timer.renderPartialTicks
                 )
+                val renderMng = mc.renderManager
+                
                 val vectors: List<*> = Arrays.asList(
                     Vector3d(aabb.minX, aabb.minY, aabb.minZ),
                     Vector3d(aabb.minX, aabb.maxY, aabb.minZ),
@@ -273,9 +272,9 @@ open class Targets : Element(-46.0, -40.0, 1F, Side(Side.Horizontal.MIDDLE, Side
                 val var38 = vectors.iterator()
                 while (var38.hasNext()) {
                     var vector = var38.next() as Vector3d?
-                    vector = RenderUtils.convertTo2D(vector!!.x - renderMng.viewerPosX,
-                                                     vector.y - renderMng.viewerPosY, 
-                                                     vector.z - renderMng.viewerPosZ)
+                    vector = RenderUtils.convertTo2D(vector?.x - renderMng.viewerPosX,
+                                                     vector?.y - renderMng.viewerPosY, 
+                                                     vector?.z - renderMng.viewerPosZ)
                     if (vector != null && vector.z >= 0.0 && vector.z < 1.0) {
                         if (position == null) {
                             position = Vector4d(vector.x, vector.y, vector.z, 0.0)
