@@ -33,8 +33,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.Entity
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
-import org.lwjgl.util.vector.Vector3d
-import org.lwjgl.util.vector.Vector4d
+import javax.vecmath.Vector3d
+import javax.vecmath.Vector4d
 import java.awt.Color
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
