@@ -110,7 +110,7 @@ public abstract class MixinItemRenderer {
         GlStateManager.pushMatrix();
 
         if (this.itemToRender != null) {
-            final boolean displayBlocking = LiquidBounce.moduleManager.getModule(KillAura.class).getDisplayBlocking();
+            final boolean displayBlocking = LiquidBounce.moduleManager.getModule(KillAura.class).getDisplayBlocking() || LiquidBounce.moduleManager.getModule(NewKillaura.class).getDisplayBlocking();
 
             if (this.itemToRender.getItem() instanceof ItemMap) {
                 this.renderItemMap(abstractclientplayer, f2, f, f1);
@@ -125,10 +125,10 @@ public abstract class MixinItemRenderer {
                         this.transformFirstPersonItem(f, f1);
                         break;
                     case BLOCK:
-                        GL11.glTranslated(animations.getTranslateXValue().get(), animations.getTranslateYValue().get(), animations.getTranslateZValue().get());
                         GlStateManager.rotate(animations.getRotateXValue().get(), 1.0F, 0.0F, 0.0F);
                         GlStateManager.rotate(animations.getRotateYValue().get(), 0.0F, 1.0F, 0.0F);
                         GlStateManager.rotate(animations.getRotateZValue().get(), 0.0F, 0.0F, 1.0F);
+                        GL11.glTranslated(animations.getTranslateXValue().get(), animations.getTranslateYValue().get(), animations.getTranslateZValue().get());
                         switch (animations.getBlockingModeValue().get()) {
                             case "1.7": {
                                 transformFirstPersonItem(f, f1);
