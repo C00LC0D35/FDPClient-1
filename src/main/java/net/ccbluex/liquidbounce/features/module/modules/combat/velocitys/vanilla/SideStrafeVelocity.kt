@@ -12,8 +12,8 @@ import net.minecraft.util.MathHelper
 import kotlin.math.cos
 import kotlin.math.sin
 
-class LegitVelocity : VelocityMode("Legit") {
-    private val legitStrafeValue = BoolValue("${valuePrefix}Strafe", false)
+class LegitVelocity : VelocityMode("SideStrafe") {
+    private val legitStrafeValue = BoolValue("${valuePrefix}Strafe", true)
     private val legitFaceValue = BoolValue("${valuePrefix}Face", true)
     private var pos: BlockPos? = null
 
