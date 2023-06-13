@@ -5,6 +5,8 @@
  */
 package net.ccbluex.liquidbounce.utils
 
+import net.ccbluex.liquidbounce.event.EventTarget
+import net.ccbluex.liquidbounce.event.PacketEvent
 import net.minecraft.network.Packet
 import net.minecraft.network.play.INetHandlerPlayServer
 import net.ccbluex.liquidbounce.utils.PacketUtils
@@ -19,7 +21,7 @@ import java.util.*
  */
 
 
-object BlinkUtils : MinecraftInstance() {
+object PingspoofUtils : MinecraftInstance() {
     private val packetBuffer = LinkedList<Packet<INetHandlerPlayServer>>()
     var minDelay = 0
     var maxDelay = 0
@@ -72,9 +74,7 @@ object BlinkUtils : MinecraftInstance() {
     // maybe coroutine better?
     private /*suspend*/ fun queuePacket(delayTime: Long) {
         Timer().schedule(delayTime) {
-            if (this@PingSpoof.state) {
-                PacketUtils.sendPacketNoEvent(packetBuffer.poll())
-            }
+            PacketUtils.sendPacketNoEvent(packetBuffer.poll())
         }
     }
 }
