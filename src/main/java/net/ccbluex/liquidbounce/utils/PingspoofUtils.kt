@@ -11,6 +11,12 @@ import net.minecraft.network.Packet
 import net.minecraft.network.play.INetHandlerPlayServer
 import net.ccbluex.liquidbounce.utils.PacketUtils
 import net.ccbluex.liquidbounce.utils.timer.TimeUtils
+import net.minecraft.network.play.client.C01PacketPing
+import net.minecraft.network.play.client.C01PacketEncryptionResponse
+import net.minecraft.network.play.client.C01PacketChatMessage
+import net.minecraft.network.play.client.C00PacketServerQuery 
+import net.minecraft.network.play.client.C00PacketLoginStart
+import net.minecraft.network.play.client.C00Handshake
 import net.minecraft.network.play.client.*
 import java.util.*
 
@@ -50,14 +56,14 @@ object PingspoofUtils : MinecraftInstance() {
     fun setPingspoofState(
         off: Boolean = false,
         release: Boolean = false,
-        minDelay: Int = 0,
-        maxDelay: Int = 0
+        minD: Int = 0,
+        maxD: Int = 0
     ) {
         if (release) {
             clearPacket()
         }
-        minDelay = minDelay
-        maxDelay = maxDelay
+        minDelay = minD
+        maxDelay = maxD
     }
     
     @EventTarget
