@@ -11,14 +11,9 @@ import net.minecraft.network.Packet
 import net.minecraft.network.play.INetHandlerPlayServer
 import net.ccbluex.liquidbounce.utils.PacketUtils
 import net.ccbluex.liquidbounce.utils.timer.TimeUtils
-import net.minecraft.network.play.client.C01PacketPing
-import net.minecraft.network.play.client.C01PacketEncryptionResponse
-import net.minecraft.network.play.client.C01PacketChatMessage
-import net.minecraft.network.play.client.C00PacketServerQuery 
-import net.minecraft.network.play.client.C00PacketLoginStart
-import net.minecraft.network.play.client.C00Handshake
 import net.minecraft.network.play.client.*
 import java.util.*
+import kotlin.concurrent.schedule
 
 /**
  * BlinkUtils | FDPClient Original
@@ -69,8 +64,9 @@ object PingspoofUtils : MinecraftInstance() {
     @EventTarget
     fun onPacket(event: PacketEvent) {
         val packet = event.packet
-        if (packet.javaClass.simpleName.startsWith("C", ignoreCase = true)) {
-            if (packet is C00Handshake || packet is C00PacketLoginStart || packet is C00PacketServerQuery || packet is C01PacketChatMessage || packet is C01PacketEncryptionResponse || packet is C01PacketPing) return
+        val packetName = packet.javaClass.simpleName
+        if (packetName.startsWith("C", ignoreCase = true)) {
+            if (packetName.startsWith("C00") || packetName.startsWith("C01")) return
             event.cancelEvent()
             packetBuffer.add(packet as Packet<INetHandlerPlayServer>)
             queuePacket(TimeUtils.randomDelay(minDelay, maxDelay))
