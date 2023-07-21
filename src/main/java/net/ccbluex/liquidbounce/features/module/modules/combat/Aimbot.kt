@@ -1,10 +1,7 @@
-/*
- * LiquidLite Ghost Client
- */
 package net.ccbluex.liquidbounce.features.module.modules.combat
 
 import net.ccbluex.liquidbounce.event.EventTarget
-import net.ccbluex.liquidbounce.event.StrafeEvent
+import net.ccbluex.liquidbounce.event.Render3DEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
@@ -30,6 +27,8 @@ class Aimbot : Module() {
     private val centerRandom = FloatValue("CenterRandomRange", 1.0F, 0F, 15F)
     private val edgeSpeed = FloatValue("EdgeSpeed", 20F, 1F, 100F)
     private val edgeRandom = FloatValue("EdgeRandomRange", 1.0F, 0F, 15F)
+    private val onTargetSlowdown = BoolValue("OnTargetSlowdown", true)
+    private val slowdownAmount = FloatValue("SlowDownAmount", 0.5f, 0.1f, 0.7f).displayable { onTargetSlowdown.get() }
     private val fovValue = FloatValue("FOV", 180F, 1F, 180F)
     private val onClickValue = BoolValue("OnClick", false)
     private val onClickDurationValue = IntegerValue("OnClickDuration", 500, 100, 1000).displayable { onClickValue.get() }
@@ -40,9 +39,17 @@ class Aimbot : Module() {
 
     private var oldMouse = Rotation(0f, 0f)
     private var newMouse = Rotation(0f, 0f)
+    
+    private var playerRot = Rotation(0f, 0f)
+    private var targetRot = Rotation(0f, 0f)
+    
+    private var onTarget = false
+    private var mouseSpeed = 0f
+    private var rotDiff = 0f
+                                            
 
     @EventTarget
-    fun onStrafe(event: StrafeEvent) {
+    fun onRender3D(event: Render3DEvent) {
         if (mc.gameSettings.keyBindAttack.isKeyDown) {
             clickTimer.reset()
         }
@@ -69,28 +76,49 @@ class Aimbot : Module() {
                                         mc.thePlayer.motionY * -1f * playerPredictValue.get(),
                                         mc.thePlayer.motionX * -1f * playerPredictValue.get())
 
-        val mouseSpeed = RotationUtils.getRotationDifference(oldMouse,  newMouse).toFloat()
-
-        var playerRot = Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
-        var targetRot = RotationUtils.toRotation(RotationUtils.getCenter(entity.entityBoundingBox), true)
-        var rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
+        
+        mouseSpeed = RotationUtils.getRotationDifference(oldMouse,  newMouse).toFloat()
+        onTarget = RotationUtils.isFaced(entity, range.toDouble())
+        
+        // on target slowdown
+        if (onTarget) {
+            val rotationSlowdown = RotationUtils.limitAngleChange(
+                newMouse, oldMouse, mouseSpeed * slowdownAmount.get()
+            )
+            rotationSlowdown.toPlayer(mc.thePlayer)
+        }
+        
+        targetRot = RotationUtils.toRotation(RotationUtils.getCenter(entity.entityBoundingBox), true)
+        if (RotationUtils.getRotationDifference(oldMouse,  targetRot).toFloat()
+            < RotationUtils.getRotationDifference(newMouse,  targetRot).toFloat() ) {
+            return
+        }
+        
+        
+        // center rotation
+        playerRot = Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+        targetRot = RotationUtils.toRotation(RotationUtils.getCenter(entity.entityBoundingBox), true)
+        rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
 
         val rotationCenter = RotationUtils.limitAngleChange(
             playerRot, targetRot,
-            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (centerSpeed.get() + (centerRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
+            (mouseSpeed / rotDiff) * mouseSpeed * (centerSpeed.get() + (centerRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
         )
 
         rotationCenter.toPlayer(mc.thePlayer)
 
-        targetRot = RotationUtils.searchCenter(entity.entityBoundingBox, false, false, true, false).rotation
-        rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
+        //edge rotation
+        if (!onTarget) {
+            targetRot = RotationUtils.searchCenter(entity.entityBoundingBox, false, false, true, false).rotation
+            rotDiff = RotationUtils.getRotationDifference(playerRot,  targetRot).toFloat()
 
-        val rotationEdge = RotationUtils.limitAngleChange(
-            playerRot, targetRot,
-            (mouseSpeed.toFloat() / rotDiff.toFloat()) * mouseSpeed.toFloat() * (edgeSpeed.get() + (edgeRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
-        )
+            val rotationEdge = RotationUtils.limitAngleChange(
+                playerRot, targetRot,
+                (mouseSpeed / rotDiff) * mouseSpeed * (edgeSpeed.get() + (edgeRandom.get() * Math.random() * 0.5f)).toFloat() * 0.1f
+            )
 
-        rotationEdge.toPlayer(mc.thePlayer)
+            rotationEdge.toPlayer(mc.thePlayer)
+        }
 
         if (jitterValue.get()) {
             val yaw = Random.nextBoolean()
