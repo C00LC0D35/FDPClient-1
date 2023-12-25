@@ -17,7 +17,7 @@ import net.ccbluex.liquidbounce.features.module.modules.movement.TargetStrafe
 import net.ccbluex.liquidbounce.features.module.modules.player.Blink
 import net.ccbluex.liquidbounce.features.module.modules.visual.FreeCam
 import net.ccbluex.liquidbounce.features.module.modules.world.Scaffold
-import net.ccbluex.liquidbounce.features.value.*
+import net.ccbluex.liquidbounce.value.*
 import net.ccbluex.liquidbounce.utils.*
 import net.ccbluex.liquidbounce.utils.extensions.getDistanceToEntityBox
 import net.ccbluex.liquidbounce.utils.extensions.hitBox
@@ -90,12 +90,14 @@ object KillAura : Module() {
             if (i < newValue) set(i)
         }
     }.displayable { attackDisplay.get() } as FloatValue
+    
+    private val throughWallsValue = BoolValue("AimThroughWalls", false)
     private val throughWallsRangeValue = object : FloatValue("ThroughWallsRange", 1.5f, 0f, 8f) {
         override fun onChanged(oldValue: Float, newValue: Float) {
             val i = rangeValue.get()
             if (i < newValue) set(i)
         }
-    }.displayable { attackDisplay.get() } as FloatValue
+    }.displayable { attackDisplay.get() && throughWallsValue.get() } as FloatValue
     private val rangeSprintReducementValue = FloatValue("RangeSprintReducement", 0f, 0f, 0.4f).displayable { attackDisplay.get() }
 
     private val swingRangeValue = object : FloatValue("SwingRange", 5f, 0f, 8f) {
@@ -385,6 +387,10 @@ object KillAura : Module() {
             if (keepDirectionValue.get()) { keepDirectionTickValue.get() + 1 } else { 1 },
             if (rotationRevValue.get()) { rotationRevTickValue.get() + 1 } else { 0 }
         )
+        if (legit2Blink) {
+            BlinkUtils.setBlinkState(off = true, release = true)
+            legit2Blink = false
+        }
     }
 
     /**
@@ -447,6 +453,10 @@ object KillAura : Module() {
             stopBlocking()
             discoveredTargets.clear()
             inRangeDiscoveredTargets.clear()
+            if (legit2Blink) {
+                BlinkUtils.setBlinkState(off = true, release = true)
+                legit2Blink = false
+            }
             return
         }
 
@@ -456,6 +466,10 @@ object KillAura : Module() {
             currentTarget = null
             hitable = false
             if (mc.currentScreen is GuiContainer) containerOpen = System.currentTimeMillis()
+            if (legit2Blink) {
+                BlinkUtils.setBlinkState(off = true, release = true)
+                legit2Blink = false
+            }
             return
         }
 
@@ -463,6 +477,10 @@ object KillAura : Module() {
 
         if (discoveredTargets.isEmpty()) {
             stopBlocking()
+            if (legit2Blink) {
+                BlinkUtils.setBlinkState(off = true, release = true)
+                legit2Blink = false
+            }
             return
         }
         
@@ -489,7 +507,7 @@ object KillAura : Module() {
             } else if (mc.thePlayer.ticksExisted % 4 == 3 || (smartAutoBlockValue.get() && mc.thePlayer.hurtTime > 3)) {
                 if (legitBlockBlinkValue.get()) {
                     BlinkUtils.setBlinkState(all = true)
-                    legit2Blink = false
+                    legit2Blink = true
                 }
                 stopBlocking()
             }
@@ -881,7 +899,7 @@ object KillAura : Module() {
                         (randomCenRangeValue.get()).toDouble(),
                         boundingBox,
                         predictValue.get(),
-                        true
+                        throughWallsValue.get()
                 ) ?: return false
 
         if (rotationModeValue.get() == "OldMatrix") directRotation.pitch = 89.9f
