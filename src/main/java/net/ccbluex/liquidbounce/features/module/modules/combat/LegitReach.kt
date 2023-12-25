@@ -6,35 +6,29 @@
 package net.ccbluex.liquidbounce.features.module.modules.combat
 
 import net.ccbluex.liquidbounce.FDPClient
-import net.ccbluex.liquidbounce.features.module.modules.combat.KillAura
-import net.ccbluex.liquidbounce.event.AttackEvent
-import net.ccbluex.liquidbounce.event.EventTarget
-import net.ccbluex.liquidbounce.event.UpdateEvent
-import net.ccbluex.liquidbounce.event.PacketEvent
-import net.ccbluex.liquidbounce.features.module.Module
-import net.ccbluex.liquidbounce.features.module.ModuleCategory
-import net.ccbluex.liquidbounce.utils.EntityUtils
-import net.ccbluex.liquidbounce.utils.PacketUtils
-import net.ccbluex.liquidbounce.utils.BlinkUtils
+import net.ccbluex.liquidbounce.event.*
+import net.ccbluex.liquidbounce.features.module.*
+import net.ccbluex.liquidbounce.utils.*
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
-import net.ccbluex.liquidbounce.features.value.ListValue
+import net.ccbluex.liquidbounce.utils.extensions.getDistanceToEntityBox
+import net.ccbluex.liquidbounce.value.*
 import net.minecraft.client.entity.EntityOtherPlayerMP
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.network.Packet
-import net.minecraft.network.play.client.C02PacketUseEntity
+import net.minecraft.network.play.client.*
 import net.minecraft.network.play.server.*
 import net.minecraft.network.play.INetHandlerPlayClient
 import net.minecraft.world.WorldSettings
 import java.util.concurrent.LinkedBlockingQueue
 
-object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT) {
+@ModuleInfo(name = "LegitReach", category = ModuleCategory.COMBAT)
+object LegitReach : Module() {
 
     var fakePlayer: EntityOtherPlayerMP? = null
     private val aura = BoolValue("Aura", false)
-    private val mode = ListValue("Mode", arrayOf("FakePlayer", "IntaveTest", "AllIncomingPackets", "TargetPackets"), "FakePlayer")
-    private val pulseDelayValue = IntegerValue("PulseDelay", 200, 50, 500)
+    private val mode = ListValue("Mode", arrayOf("FakePlayer", "IntaveTest", "IncomingBlink"), "IncomingBlink")
+    private val pulseDelayValue = IntegerValue("MaxBacktrackLength", 200, 50, 1000)
+    private val velocityValue = BoolValue("StopOnVelocity", true). displayable { mode.equals("IncomingBlink") }
     private val intavetesthurttime = IntegerValue("Packets", 5, 0, 30).displayable { mode.equals("IntaveTest") }
     
     private val pulseTimer = MSTimer()
@@ -43,16 +37,19 @@ object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT
     
     private val packets = LinkedBlockingQueue<Packet<INetHandlerPlayClient>>()
 
+    private var comboCounter = 0
+    private var backtrack = false
+
 
     override fun onEnable() {
-        if (mode.equals("AllIncomingPackets")) {
+        if (mode.equals("IncomingBlink")) {
             BlinkUtils.setBlinkState(all = true)
         }
     }
     override fun onDisable() {
         removeFakePlayer()
         clearPackets()
-        if (mode.equals("AllIncomingPackets")) {
+        if (mode.equals("IncomingBlink")) {
             BlinkUtils.setBlinkState(off = true, release = true)
         }
     }
@@ -69,6 +66,7 @@ object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT
             PacketUtils.handlePacket(packets.take() as Packet<INetHandlerPlayClient?>)
         }
         BlinkUtils.releasePacket()
+        backtrack = false
     }
 
 
@@ -83,6 +81,7 @@ object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT
 
     @EventTarget
     fun onAttack(event: AttackEvent) {
+        comboCounter ++
         if ( mode.equals("FakePlayer") || mode.equals("IntaveTest") ) {
             clearPackets()
             if (fakePlayer == null) {
@@ -121,11 +120,21 @@ object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT
                 clearPackets()
                 currentTarget = event.targetEntity as EntityLivingBase?
             }
+            currentTarget?.let {
+                if (mc.thePlayer.getDistanceToEntityBox(it) > 2f) {
+                    if (comboCounter >= 2) {
+                        backtrack = true
+                    }
+                }
+            }
         }
     }
 
     @EventTarget
     fun onUpdate(@Suppress("UNUSED_PARAMETER") event: UpdateEvent?) {
+            if (!FDPClient.combatManager.inCombat) {
+               removeFakePlayer()
+            }
         if ( mode.equals("FakePlayer") || mode.equals("IntaveTest") ) {
             if (aura.get() && !FDPClient.moduleManager[KillAura::class.java]!!.state) {
                 removeFakePlayer()
@@ -198,16 +207,17 @@ object LegitReach : Module(name = "LegitReach", category = ModuleCategory.COMBAT
     @EventTarget
     fun onPacket(event: PacketEvent) {
         val packet = event.packet
-        if (aura.get() && !FDPClient.moduleManager[KillAura::class.java]!!.state) return
+        if (aura.get() && !FDPClient.moduleManager[KillAura::class.java]!!.state) {
+            clearPackets()
+            return
+        }
+
+        if (packet is S12PacketEntityVelocity && velocityValue.get()) {
+            comboCounter = 0
+            clearPackets()
+        }
         
-        if (mode.equals("TargetPackets")) {
-            if (packet is S14PacketEntity) {
-                if (packet.getEntity(mc.theWorld) == currentTarget) {
-                    event.cancelEvent()
-                    packets.add(packet as Packet<INetHandlerPlayClient>)
-                }
-            }
-        } else if (mode.equals("AllIncomingPackets")) {
+        if (mode.equals("IncomingBlink") && backtrack) {
             if (packet.javaClass.simpleName.startsWith("S", ignoreCase = true)) {
                 if (mc.thePlayer.ticksExisted < 20) return
                 event.cancelEvent()

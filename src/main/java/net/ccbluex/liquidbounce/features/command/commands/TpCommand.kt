@@ -1,13 +1,18 @@
+/*
+ * FDPClient Hacked Client
+ * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge by LiquidBounce.
+ * https://github.com/SkidderMC/FDPClient/
+ */
 package net.ccbluex.liquidbounce.features.command.commands
 
 import net.ccbluex.liquidbounce.features.command.Command
-import net.ccbluex.liquidbounce.features.module.modules.misc.AntiBot
+import net.ccbluex.liquidbounce.features.module.modules.other.AntiBot
 import net.ccbluex.liquidbounce.utils.PathUtils
 import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
 import java.util.function.Consumer
 import javax.vecmath.Vector3d
 
-class TeleportCommand : Command("tp", arrayOf("teleport")) {
+class TpCommand : Command("tp", arrayOf("teleport")) {
 
     /**
      * Execute commands with provided [args]

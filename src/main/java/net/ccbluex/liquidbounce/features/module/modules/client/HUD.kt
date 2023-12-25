@@ -9,17 +9,19 @@ import net.ccbluex.liquidbounce.FDPClient
 import net.ccbluex.liquidbounce.event.*
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
-import net.ccbluex.liquidbounce.features.module.modules.client.button.*
-import net.ccbluex.liquidbounce.features.value.*
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.ui.cape.GuiCapeManager.height
-import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule.colorBlueValue
-import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule.colorGreenValue
-import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule.colorRedValue
+import net.ccbluex.liquidbounce.ui.clickgui.ClickGUIModule.colorBlueValue
+import net.ccbluex.liquidbounce.ui.clickgui.ClickGUIModule.colorGreenValue
+import net.ccbluex.liquidbounce.ui.clickgui.ClickGUIModule.colorRedValue
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils.rainbow
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
-import net.minecraft.client.gui.GuiButton
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.MathHelper
@@ -27,14 +29,16 @@ import net.minecraft.util.ResourceLocation
 import java.awt.Color
 import java.util.*
 
-object HUD : Module("HUD", category = ModuleCategory.CLIENT, array = false, defaultOn = true) {
+@ModuleInfo(name = "HUD", category = ModuleCategory.CLIENT, array = false, defaultOn = true)
+object HUD : Module() {
     val shadowValue = ListValue("TextShadowMode", arrayOf("LiquidBounce", "Outline", "Default", "Autumn"), "Default")
-    val clolormode = ListValue("ColorMode", arrayOf("Rainbow", "Light Rainbow", "Static", "Double Color", "Default"), "Light Rainbow")
-    val hueInterpolation = BoolValue("hueInterpolation", false)
+    private val clolormode = ListValue("ColorMode", arrayOf("Rainbow", "Light Rainbow", "Static", "Double Color", "Default"), "Light Rainbow")
+    val shadowAlpha = IntegerValue("Shadow Alpha", 150, 0, 155)
     val movingcolors = BoolValue("MovingColors", false)
     val inventoryParticle = BoolValue("InventoryParticle", false)
+    val hueInterpolation = BoolValue("hueInterpolation", false)
     private val blurValue = BoolValue("Blur", false)
-    val HealthValue = BoolValue("Health", true)
+    private val HealthValue = BoolValue("Health", true)
     private val waterMark = BoolValue("Watermark", true)
     val rainbowStartValue = FloatValue("RainbowStart", 0.55f, 0f, 1f)
     val rainbowStopValue = FloatValue("RainbowStop", 0.85f, 0f, 1f)
@@ -47,7 +51,7 @@ object HUD : Module("HUD", category = ModuleCategory.CLIENT, array = false, defa
     val arraylistYAxisAnimSpeedValue = IntegerValue("ArraylistYAxisAnimSpeed", 10, 5, 20)
     val arraylistYAxisAnimTypeValue = EaseUtils.getEnumEasingList("ArraylistYAxisAnimType")
     val arraylistYAxisAnimOrderValue = EaseUtils.getEnumEasingOrderList("ArraylistYAxisHotbarAnimOrder").displayable { !arraylistYAxisAnimTypeValue.equals("NONE") }
-    val fontEpsilonValue = FloatValue("FontVectorEpsilon", 0.5f, 0f, 1.5f)
+    private val fontEpsilonValue = FloatValue("FontVectorEpsilon", 0.5f, 0f, 1.5f)
 
     private var lastFontEpsilon = 0f
 
@@ -147,5 +151,4 @@ object HUD : Module("HUD", category = ModuleCategory.CLIENT, array = false, defa
         }
         return arrayOf(firstColor, secondColor)
     }
-
 }

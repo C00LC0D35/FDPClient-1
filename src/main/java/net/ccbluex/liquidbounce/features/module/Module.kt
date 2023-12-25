@@ -20,32 +20,31 @@ import net.ccbluex.liquidbounce.utils.render.Animation
 import net.ccbluex.liquidbounce.utils.render.ColorUtils.stripColor
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.Translate
-import net.ccbluex.liquidbounce.features.value.Value
+import net.ccbluex.liquidbounce.value.Value
 import org.lwjgl.input.Keyboard
-import java.util.ArrayList
-open class Module @JvmOverloads constructor(
-    var name: String,
-    var description: String = "",
-    var category: ModuleCategory,
-    var keyBind: Int = Keyboard.CHAR_NONE,
-    var array: Boolean = true,
-    val canEnable: Boolean = true,
-    var autoDisable: EnumAutoDisableType = EnumAutoDisableType.NONE,
-    val moduleCommand: Boolean = true,
-    val defaultOn: Boolean = true,
-    val forceNoSound: Boolean = false,
-    var triggerType: EnumTriggerType = EnumTriggerType.TOGGLE
-) : MinecraftInstance(), Listenable, Annotation {
 
-    var tKeyBind = keyBind
-    set(keyBind) {
-        field = keyBind
+open class Module : MinecraftInstance(), Listenable {
+    // Module information
+    val translate = Translate(0F,0F)
+    val tab = Translate(0f , 0f)
+    val animation: AnimationHelper
+    var name: String
+    private var suffix: String? = null
+    private val properties: List<Value<*>> = ArrayList<Value<*>>()
+    private var toggled = false
+    var localizedName = ""
+        get() = field.ifEmpty { name }
+    var description: String
+    var category: ModuleCategory
+    var keyBind = Keyboard.CHAR_NONE
+        set(keyBind) {
+            field = keyBind
 
-        if (!FDPClient.isStarting) {
-            FDPClient.configManager.smartSave()
+            if (!FDPClient.isStarting) {
+                FDPClient.configManager.smartSave()
+            }
         }
-    }
-    var tArray = array
+    var array = true
         set(array) {
             field = array
 
@@ -53,19 +52,11 @@ open class Module @JvmOverloads constructor(
                 FDPClient.configManager.smartSave()
             }
         }
-
-    val translate = Translate(0F,0F)
-    val animation: AnimationHelper
-        get() {
-            TODO()
-        }
-    val tab = Translate(0f , 0f)
-    var expanded: Boolean = false
-    private var suffix: String? = null
-    private val properties: List<Value<*>> = ArrayList<Value<*>>()
-    var toggled = false
-    var localizedName = ""
-        get() = field.ifEmpty { name }
+    val canEnable: Boolean
+    var autoDisable: EnumAutoDisableType
+    var triggerType: EnumTriggerType
+    val moduleCommand: Boolean
+    val moduleInfo = javaClass.getAnnotation(ModuleInfo::class.java)!!
     var splicedName = ""
         get() {
             if (field.isEmpty()) {
@@ -82,6 +73,19 @@ open class Module @JvmOverloads constructor(
             }
             return field
         }
+
+    init {
+        name = moduleInfo.name
+        animation = AnimationHelper(this)
+        description = moduleInfo.description.ifEmpty { LanguageManager.getAndFormat("module.$name.description") }
+        category = moduleInfo.category
+        keyBind = moduleInfo.keyBind
+        array = moduleInfo.array
+        canEnable = moduleInfo.canEnable
+        autoDisable = moduleInfo.autoDisable
+        moduleCommand = moduleInfo.moduleCommand
+        triggerType = moduleInfo.triggerType
+    }
 
     open fun onLoad() {
         localizedName = if(LanguageManager.getAndFormat("module.$name.name") == "module.$name.name") {
@@ -128,7 +132,7 @@ open class Module @JvmOverloads constructor(
 
     // HUD
     val hue = Math.random().toFloat()
-    var slideAnimation: Animation? = null
+    private var slideAnimation: Animation? = null
     var slide = 0f
         get() {
             if (slideAnimation != null) {
@@ -141,8 +145,15 @@ open class Module @JvmOverloads constructor(
         }
         set(value) {
             if (slideAnimation == null || (slideAnimation != null && slideAnimation!!.to != value.toDouble())) {
-                slideAnimation = Animation(EaseUtils.EnumEasingType.valueOf(HUD.arraylistXAxisAnimTypeValue.get()), EaseUtils.EnumEasingOrder.valueOf(HUD.arraylistXAxisAnimOrderValue.get()), field.toDouble(), value.toDouble(), HUD.arraylistXAxisAnimSpeedValue.get() * 30L).start()
+                slideAnimation = Animation(
+                    EaseUtils.EnumEasingType.valueOf(HUD.arraylistXAxisAnimTypeValue.get()),
+                    EaseUtils.EnumEasingOrder.valueOf(HUD.arraylistXAxisAnimOrderValue.get()),
+                    field.toDouble(),
+                    value.toDouble(),
+                    HUD.arraylistXAxisAnimSpeedValue.get() * 30L
+                ).start()
             }
+            field = value
         }
     var yPosAnimation: Animation? = null
     open var yPos = 0f
@@ -157,8 +168,15 @@ open class Module @JvmOverloads constructor(
         }
         set(value) {
             if (yPosAnimation == null || (yPosAnimation != null && yPosAnimation!!.to != value.toDouble())) {
-                yPosAnimation = Animation(EaseUtils.EnumEasingType.valueOf(HUD.arraylistYAxisAnimTypeValue.get()), EaseUtils.EnumEasingOrder.valueOf(HUD.arraylistYAxisAnimOrderValue.get()), field.toDouble(), value.toDouble(), HUD.arraylistYAxisAnimSpeedValue.get() * 30L).start()
+                yPosAnimation = Animation(
+                    EaseUtils.EnumEasingType.valueOf(HUD.arraylistYAxisAnimTypeValue.get()),
+                    EaseUtils.EnumEasingOrder.valueOf(HUD.arraylistYAxisAnimOrderValue.get()),
+                    field.toDouble(),
+                    value.toDouble(),
+                    HUD.arraylistYAxisAnimSpeedValue.get() * 30L
+                ).start()
             }
+            field = value
         }
 
     // Tag
@@ -251,17 +269,5 @@ open class Module @JvmOverloads constructor(
      * Events should be handled when module is enabled
      */
     override fun handleEvents() = state
-
-    enum class EnumAutoDisableType {
-        NONE,
-        RESPAWN,
-        FLAG,
-        GAME_END
-    }
-
-    enum class EnumTriggerType {
-        TOGGLE,
-        PRESS
-    }
 
 }

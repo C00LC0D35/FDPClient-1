@@ -6,7 +6,6 @@
 package net.ccbluex.liquidbounce.ui.client
 
 import net.ccbluex.liquidbounce.FDPClient
-import net.ccbluex.liquidbounce.features.special.GradientBackground
 import net.ccbluex.liquidbounce.utils.extensions.drawCenteredString
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils
 import net.minecraft.client.gui.GuiButton
@@ -25,7 +24,7 @@ class GuiBackground(private val prevGui: GuiScreen) : GuiScreen() {
     companion object {
         var enabled = true
         var particles = false
-        var blur = false
+        var shader = false
     }
 
     private lateinit var enabledButton: GuiButton
@@ -62,11 +61,9 @@ class GuiBackground(private val prevGui: GuiScreen) : GuiScreen() {
     }
 
     private fun updateButtons() {
-        enabledButton.displayString = "%ui.status% (${if (enabled) "%ui.on%" else "%ui.off%"})"
-        blurButton.displayString = "Background Blur (${if (blur) "%ui.on%" else "%ui.off%"})"
-        typeButton.displayString = "%ui.background.gtype%: ${GradientBackground.gradientSide}"
-        particlesButton.displayString = "%ui.background.particles% (${if (particles) "%ui.on%" else "%ui.off%"})"
-        animatedButton.displayString = "%ui.background.ganimated% (${if (GradientBackground.animated) "%ui.on%" else "%ui.off%"})"
+        enabledButton.displayString = "Status (${if (enabled) "ON" else "OFF"})"
+        blurButton.displayString = " Shadow (${if (shader) "ON" else "OFF"})"
+        particlesButton.displayString = "Particles (${if (particles) "ON" else "OFF"})"
         val hasCustomBackground = FDPClient.background != null
         lastButton.enabled = !hasCustomBackground
         nextButton.enabled = !hasCustomBackground
@@ -80,7 +77,7 @@ class GuiBackground(private val prevGui: GuiScreen) : GuiScreen() {
                 enabled = !enabled
             }
             9 -> {
-                blur = !blur
+                shader = !shader
             }
             2 -> {
                 particles = !particles
@@ -105,28 +102,8 @@ class GuiBackground(private val prevGui: GuiScreen) : GuiScreen() {
                 FDPClient.background = null
                 FDPClient.fileManager.backgroundFile.delete()
             }
-            5 -> {
-                val index = GradientBackground.gradientSides.indexOf(GradientBackground.gradientSide)
-                GradientBackground.gradientSide = if(index == GradientBackground.gradientSides.lastIndex) {
-                    GradientBackground.gradientSides[0]
-                } else {
-                    GradientBackground.gradientSides[index + 1]
-                }
-            }
-            6, 7 -> {
-                val indexAffect = if(button.id == 6) -1 else 1
-                val index = GradientBackground.gradients.indexOf(GradientBackground.nowGradient) + indexAffect
-                GradientBackground.nowGradient = if(index > GradientBackground.gradients.lastIndex) {
-                    GradientBackground.gradients[0]
-                } else if(index < 0) {
-                    GradientBackground.gradients[GradientBackground.gradients.lastIndex]
-                } else {
-                    GradientBackground.gradients[index]
-                }
-            }
-            8 -> {
-                GradientBackground.animated = !GradientBackground.animated
-            }
+            // Remove the gradient-related cases (5, 6, 7, 8)
+
             0 -> mc.displayGuiScreen(prevGui)
         }
 
@@ -138,7 +115,7 @@ class GuiBackground(private val prevGui: GuiScreen) : GuiScreen() {
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         drawBackground(0)
         mc.fontRendererObj.drawCenteredString("%ui.background%", this.width / 2F, height / 8F + 5F, 4673984, true)
-        mc.fontRendererObj.drawCenteredString("%ui.background.gcurrent%: " + if(FDPClient.background == null) { GradientBackground.nowGradient.name } else { "Customized" },
+        mc.fontRendererObj.drawCenteredString("%ui.background.gcurrent%: " + if(FDPClient.background == null) { "Customized" } else { "Customized" },
             this.width / 2F, height / 4 + 40 + 25 * 2f + (20 - mc.fontRendererObj.FONT_HEIGHT) * 0.5f, Color.WHITE.rgb, true)
 
         super.drawScreen(mouseX, mouseY, partialTicks)

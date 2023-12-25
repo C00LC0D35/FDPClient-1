@@ -5,8 +5,9 @@
  */
 package net.ccbluex.liquidbounce.injection.forge.mixins.gui;
 
+import net.ccbluex.liquidbounce.handler.protocol.api.ProtocolSelector;
+import net.ccbluex.liquidbounce.ui.altmanager.GuiAltManager;
 import net.ccbluex.liquidbounce.ui.client.GuiProxySelect;
-import net.ccbluex.liquidbounce.ui.client.GuiServerSpoof;
 import net.ccbluex.liquidbounce.ui.elements.ToolDropdown;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -25,9 +26,10 @@ public abstract class MixinGuiMultiplayer extends MixinGuiScreen {
     @Inject(method = "initGui", at = @At("RETURN"))
     private void initGui(CallbackInfo callbackInfo) {
         buttonList.add(toolButton = new GuiButton(997, 5, 8, 138, 20, "Tools"));
-        buttonList.add(new GuiButton(998, width - 104, 8, 98, 20, "%ui.serverSpoof%"));
-        buttonList.add(new GuiButton(999, width - 208, 8, 98, 20, "Proxy"));
+        buttonList.add(new GuiButton(998, width - 94, 5, 88, 20, "Alt Manager"));
+        buttonList.add(new GuiButton(1151, 4, height - 24, 68, 20, "Protocol"));
     }
+
 
     @Inject(method = "actionPerformed", at = @At("HEAD"))
     private void actionPerformed(GuiButton button, CallbackInfo callbackInfo) {
@@ -35,12 +37,15 @@ public abstract class MixinGuiMultiplayer extends MixinGuiScreen {
             ToolDropdown.toggleState();
 
         switch(button.id) {
-            case 998:
-                mc.displayGuiScreen(new GuiServerSpoof((GuiScreen) (Object) this));
-                break;
             case 999:
                 mc.displayGuiScreen(new GuiProxySelect((GuiScreen) (Object) this));
                 break;
+        }
+        if (button.id == 998) {
+            mc.displayGuiScreen(new GuiAltManager((GuiScreen) (Object) this));
+        }
+        if (button.id == 1151) {
+            mc.displayGuiScreen(new ProtocolSelector((GuiScreen) (Object) this));
         }
     }
 

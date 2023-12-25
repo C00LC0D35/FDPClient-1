@@ -17,7 +17,7 @@ import net.ccbluex.liquidbounce.utils.extensions.ping
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.ShadowUtils
-import net.ccbluex.liquidbounce.features.value.*
+import net.ccbluex.liquidbounce.value.*
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ChatAllowedCharacters
 import org.lwjgl.input.Keyboard
@@ -117,8 +117,6 @@ class Text(
                     SessionUtils.getFormatSessionTime()
                 }
             }
-            "kills" -> StatisticsUtils.getKills().toString()
-            "deaths" -> StatisticsUtils.getDeaths().toString()
             "username" -> mc.getSession().username
             "clientName" -> FDPClient.CLIENT_NAME
             "clientVersion" -> FDPClient.CLIENT_VERSION

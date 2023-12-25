@@ -9,19 +9,19 @@ import net.ccbluex.liquidbounce.event.EventTarget
 import net.ccbluex.liquidbounce.event.Render2DEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
-import net.ccbluex.liquidbounce.font.FontLoaders
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.ui.font.cf.FontLoaders
 import net.ccbluex.liquidbounce.utils.render.Animation
 import net.ccbluex.liquidbounce.utils.render.BlurUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils.rainbow
 import net.ccbluex.liquidbounce.utils.render.ColorUtils.skyRainbow
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.FloatValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
-import net.ccbluex.liquidbounce.features.value.ListValue
-import net.minecraft.client.gui.FontRenderer
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 import net.minecraft.client.gui.GuiIngame
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
@@ -35,21 +35,24 @@ import net.minecraft.util.ResourceLocation
 import java.awt.Color
 import java.text.SimpleDateFormat
 import kotlin.math.max
-object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array = false, defaultOn = true) {
-    val hotbarValue = ListValue("HotbarMode", arrayOf("Minecraft", "Rounded", "Full", "LB", "Rise", "Gradient", "Overflow", "Glow", "Glowing", "Dock", "Exhi", "BlueIce", "Win11", "Bread"), "Rounded")
-    val hotbarAlphaValue = IntegerValue("HotbarAlpha", 70, 0, 255)
-    val hotbarEaseValue = BoolValue("HotbarEase", true)
+
+@ModuleInfo(name = "Hotbar", category = ModuleCategory.CLIENT, array = false, defaultOn = true)
+object HotbarSettings : Module() {
+
+    val hotbarValue = ListValue("HotbarMode", arrayOf("Minecraft", "Rounded", "Full", "LB", "Rise", "Gradient", "Overflow", "Glow", "Glowing", "Dock", "Exhi", "BlueIce", "Win11", "Bread"), "Minecraft")
+    private val hotbarAlphaValue = IntegerValue("HotbarAlpha", 70, 0, 255)
+    private val hotbarEaseValue = BoolValue("HotbarEase", false)
     private val BlurValue = BoolValue("Blur", false)
     private val BlurAmount = FloatValue("BlurAmount", 10F, 1F, 100F).displayable { BlurValue.get() }
     private val ItemCountValue = BoolValue("ItemColorCount", false)
-    val ItemFontValue = ListValue("ItemFont", arrayOf("MiSans", "Minecraft"), "Minecraft")
+    private val ItemFontValue = ListValue("ItemFont", arrayOf("MiSans", "Minecraft"), "Minecraft")
     private val hotbarAnimSpeedValue = IntegerValue("HotbarAnimSpeed", 10, 5, 20).displayable { hotbarEaseValue.get() }
     private val hotbarAnimTypeValue = EaseUtils.getEnumEasingList("HotbarAnimType").displayable { hotbarEaseValue.get() }
     private val hotbarAnimOrderValue = EaseUtils.getEnumEasingOrderList("HotbarAnimOrder").displayable { hotbarEaseValue.get() }
     @EventTarget
     fun onRender2D(event: Render2DEvent) {
         val sr = event.scaledResolution
-        val i = sr.getScaledWidth() / 2
+        val i = sr.scaledWidth / 2
         val entityplayer = mc.renderViewEntity as EntityPlayer
         val itemX = sr.scaledWidth / 2 - 91 + getHotbarEasePos(entityplayer.inventory.currentItem * 20)
         val posInv = (91 - i + itemX).toFloat()
@@ -68,28 +71,36 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
                 // date and time
                 val dateFormat = SimpleDateFormat("dd/MM/yy")
                 val date = dateFormat.format(System.currentTimeMillis())
-                FontLoaders.F14.drawString(date, sr.scaledWidth - FontLoaders.F14.getStringWidth(date) - 4F,sr.scaledHeight - 9F,  Color(255, 255, 255).rgb)
+                FontLoaders.F14.drawString(date,
+                    (sr.scaledWidth - FontLoaders.F14.getStringWidth(date) - 4F).toFloat(),sr.scaledHeight - 9F,  Color(255, 255, 255).rgb)
                 val hourFormat = SimpleDateFormat("HH:mm")
                 val time = hourFormat.format(System.currentTimeMillis())
-                FontLoaders.F14.drawString(time, sr.scaledWidth - FontLoaders.F14.getStringWidth(time) - 4F,sr.scaledHeight - 18F,  Color(255, 255, 255).rgb)
+                FontLoaders.F14.drawString(time,
+                    (sr.scaledWidth - FontLoaders.F14.getStringWidth(time) - 4F).toFloat(),sr.scaledHeight - 18F,  Color(255, 255, 255).rgb)
                 // get distance date takes up
                 val padding = max(FontLoaders.F14.getStringWidth(time), FontLoaders.F14.getStringWidth(date)) + 10
                 // fake icons
-                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/1.png"), (sr.scaledWidth - padding) - 10, sr.scaledHeight - 17, 10, 10)
-                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/2.png"), (sr.scaledWidth - padding) - 28, sr.scaledHeight - 17, 10, 10)
-                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/3.png"), (sr.scaledWidth - padding) - 46, sr.scaledHeight - 17, 10, 10)
+                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/1.png"),
+                    ((sr.scaledWidth - padding) - 10).toInt(), sr.scaledHeight - 17, 10, 10)
+                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/2.png"),
+                    ((sr.scaledWidth - padding) - 28).toInt(), sr.scaledHeight - 17, 10, 10)
+                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/3.png"),
+                    ((sr.scaledWidth - padding) - 46).toInt(), sr.scaledHeight - 17, 10, 10)
                 // lang idicator
                 val loccode = mc.gameSettings.language.uppercase()
                 val lang = loccode.substringBefore("_", "null")
                 val region = loccode.substringAfter("_", "null")
-                FontLoaders.F14.drawString(lang, (sr.scaledWidth - padding) - 62F,sr.scaledHeight - 17F,  Color(255, 255, 255).rgb)
-                FontLoaders.F14.drawString(region, (sr.scaledWidth - padding) - 62F,sr.scaledHeight - 10F,  Color(255, 255, 255).rgb)
+                FontLoaders.F14.drawString(lang,
+                    ((sr.scaledWidth - padding) - 62F).toFloat(),sr.scaledHeight - 17F,  Color(255, 255, 255).rgb)
+                FontLoaders.F14.drawString(region,
+                    ((sr.scaledWidth - padding) - 62F).toFloat(),sr.scaledHeight - 10F,  Color(255, 255, 255).rgb)
                 // fake expand tray icon
                 val paddingAfter = (max(
                     FontLoaders.F14.getStringWidth(time),
                     FontLoaders.F14.getStringWidth(date)
                 ) + 10) + (max(FontLoaders.F14.getStringWidth(lang), FontLoaders.F14.getStringWidth(region)) + 2)
-                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/up.png"), (sr.scaledWidth - paddingAfter) - 68, sr.scaledHeight - 17, 10, 10)
+                RenderUtils.drawImage(ResourceLocation("fdpclient/ui/hotbar/up.png"),
+                    ((sr.scaledWidth - paddingAfter) - 68).toInt(), sr.scaledHeight - 17, 10, 10)
             }
             hotbarValue.get() ==  "Rise" -> {
                 if(BlurValue.get() && BlurAmount.get() > 1F ) {
@@ -99,7 +110,7 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
                 RenderUtils.drawRect(itemX.toFloat(), (sr.scaledHeight - 22).toFloat(), (itemX + 22).toFloat(), (sr.scaledHeight - 21).toFloat(), rainbow())
                 RenderUtils.drawRect(itemX.toFloat(), (sr.scaledHeight - 21).toFloat(), (itemX + 22).toFloat(), sr.scaledHeight.toFloat(), Color(0, 0, 0, hotbarAlphaValue.get()))
                 RenderHelper.enableGUIStandardItemLighting()
-                for (Index in 0..8) { HotbarItems(Index, sr.scaledWidth / 2 - 90 + Index * 20 + 2, sr.scaledHeight - 19); HotbarTextOverlay(sr.scaledWidth / 2 - 90 + Index * 20 + 2, sr.scaledHeight - 19, null as String?, Index) }
+                for (Index: Int in 0..8) { HotbarItems(Index, sr.scaledWidth / 2 - 90 + Index * 20 + 2, sr.scaledHeight - 19); HotbarTextOverlay(sr.scaledWidth / 2 - 90 + Index * 20 + 2, sr.scaledHeight - 19, null as String?, Index) }
                 RenderHelper.disableStandardItemLighting()
             }
             hotbarValue.get() == "Full" -> {
@@ -179,12 +190,16 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
                 GlStateManager.pushMatrix()
                 for (item in 0..8) {
                     var height = sr.scaledHeight - 19
-                    if (item == entityplayer.inventory.currentItem) {
-                        height = sr.scaledHeight - 23
-                    } else if (item == entityplayer.inventory.currentItem + 1 || item == entityplayer.inventory.currentItem - 1) {
-                        height = sr.scaledHeight - 21
-                    } else if (item == entityplayer.inventory.currentItem + 2 || item == entityplayer.inventory.currentItem - 2) {
-                        height = sr.scaledHeight - 20
+                    when (item) {
+                        entityplayer.inventory.currentItem -> {
+                            height = sr.scaledHeight - 23
+                        }
+                        entityplayer.inventory.currentItem + 1, entityplayer.inventory.currentItem - 1 -> {
+                            height = sr.scaledHeight - 21
+                        }
+                        entityplayer.inventory.currentItem + 2, entityplayer.inventory.currentItem - 2 -> {
+                            height = sr.scaledHeight - 20
+                        }
                     }
                     HotbarItems(item, sr.scaledWidth / 2 - 90 + item * 20 + 2, height)
                     HotbarTextOverlay(sr.scaledWidth / 2 - 90 + item * 20 + 2, height, null as String?, item)
@@ -241,7 +256,7 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
             HotbarTextOverlay(xPos, yPos, null as String?, index)
         }
     }
-    fun HotbarDurabilityOverlay(stack: ItemStack?, xPosition: Int, yPosition: Int) {
+    private fun HotbarDurabilityOverlay(stack: ItemStack?, xPosition: Int, yPosition: Int) {
         if (stack != null) {
             if (stack.item.showDurabilityBar(stack)) {
                 GlStateManager.disableTexture2D()
@@ -254,7 +269,8 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
             }
         }
     }
-    fun HotbarTextOverlay(xPosition: Int, yPosition: Int, text: String?, index: Int) {
+    @JvmStatic
+    private fun HotbarTextOverlay(xPosition: Int, yPosition: Int, text: String?, index: Int) {
         val entityplayer = mc.renderViewEntity as EntityPlayer
         val stack = entityplayer.inventory.mainInventory[index]
         if (stack != null) {
@@ -311,7 +327,9 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
         }
         set(value) {
             var hotbarSpeed = hotbarAnimSpeedValue.get()
-            if(hotbarValue.get() == "Dock"){ hotbarSpeed = 4}
+            if (hotbarValue.get() == "Dock") {
+                hotbarSpeed = 4
+            }
             if (easeAnimation == null || (easeAnimation != null && easeAnimation!!.to != value.toDouble())) {
                 easeAnimation = Animation(
                     EaseUtils.EnumEasingType.valueOf(hotbarAnimTypeValue.get()),
@@ -321,6 +339,7 @@ object HotbarSettings : Module("Hotbar", category = ModuleCategory.CLIENT, array
                     hotbarSpeed * 30L
                 ).start()
             }
+            field = value
         }
     fun getHotbarEasePos(x: Int): Int {
         if (!hotbarEaseValue.get()) return x

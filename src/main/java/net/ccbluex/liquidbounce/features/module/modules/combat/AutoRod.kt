@@ -5,9 +5,10 @@ import net.ccbluex.liquidbounce.event.EventTarget
 import net.ccbluex.liquidbounce.event.UpdateEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.FloatValue
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
 import net.minecraft.enchantment.EnchantmentHelper
 import net.minecraft.entity.EnumCreatureAttribute
 import net.minecraft.entity.ai.attributes.AttributeModifier
@@ -15,7 +16,9 @@ import net.minecraft.init.Items
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 
-class AutoRod: Module(name = "AutoRod", category = ModuleCategory.COMBAT) {
+@ModuleInfo(name = "AutoRod", category = ModuleCategory.COMBAT)
+object AutoRod: Module() {
+
     private val t1 = MSTimer()
     private val t2 = MSTimer()
 

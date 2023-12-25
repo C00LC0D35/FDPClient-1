@@ -7,10 +7,15 @@ package net.ccbluex.liquidbounce.features.command.commands
 
 import net.ccbluex.liquidbounce.FDPClient
 import net.ccbluex.liquidbounce.features.command.Command
-import net.ccbluex.liquidbounce.features.module.modules.misc.AntiBot
+import net.ccbluex.liquidbounce.features.module.modules.other.AntiBot
 import net.ccbluex.liquidbounce.utils.misc.StringUtils
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
 
+/**
+ * Friend Command
+ *
+ * Provides subcommands related to managing friends, such as adding, removing, aliasing, listing, and clearing friends.
+ */
 class FriendCommand : Command("friend", arrayOf("friends")) {
     /**
      * Execute commands with provided [args]

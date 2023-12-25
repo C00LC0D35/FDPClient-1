@@ -9,18 +9,20 @@ import com.google.gson.JsonParser
 import net.ccbluex.liquidbounce.event.ClientShutdownEvent
 import net.ccbluex.liquidbounce.event.EventManager
 import net.ccbluex.liquidbounce.features.command.CommandManager
-import net.ccbluex.liquidbounce.features.macro.MacroManager
+import net.ccbluex.liquidbounce.handler.macro.MacroManager
 import net.ccbluex.liquidbounce.features.module.ModuleManager
-import net.ccbluex.liquidbounce.features.special.*
-import net.ccbluex.liquidbounce.file.FileManager
-import net.ccbluex.liquidbounce.file.config.ConfigManager
+import net.ccbluex.liquidbounce.config.FileManager
+import net.ccbluex.liquidbounce.config.core.ConfigManager
+import net.ccbluex.liquidbounce.handler.combat.CombatManager
+import net.ccbluex.liquidbounce.handler.discord.DiscordRPC
+import net.ccbluex.liquidbounce.handler.network.BungeeCordSpoof
+import net.ccbluex.liquidbounce.handler.network.ClientFixes
+import net.ccbluex.liquidbounce.handler.network.ClientSpoofHandler
 import net.ccbluex.liquidbounce.ui.client.gui.EnumLaunchFilter
 import net.ccbluex.liquidbounce.ui.client.gui.LaunchFilterInfo
 import net.ccbluex.liquidbounce.ui.client.gui.LaunchOption
 import net.ccbluex.liquidbounce.ui.client.gui.GuiLaunchOptionSelectMenu
-import net.ccbluex.liquidbounce.ui.client.gui.scriptOnline.ScriptSubscribe
-import net.ccbluex.liquidbounce.ui.client.gui.scriptOnline.Subscriptions
-import net.ccbluex.liquidbounce.script.ScriptManager
+import net.ccbluex.liquidbounce.handler.script.ScriptManager
 import net.ccbluex.liquidbounce.ui.cape.GuiCapeManager
 import net.ccbluex.liquidbounce.ui.client.hud.HUD
 import net.ccbluex.liquidbounce.ui.client.keybind.KeyBindManager
@@ -41,8 +43,8 @@ object FDPClient {
     const val CLIENT_NAME = "FDPClient"
     const val COLORED_NAME = "§7[§b§lFDPClient§7] "
     const val CLIENT_CREATOR = "CCBlueX, Zywl & SkidderMC TEAM"
-    const val CLIENT_WEBSITE = "fdpinfo.github.io"
-    const val CLIENT_VERSION = "v5.3.5"
+    const val CLIENT_WEBSITE = "https://fdpinfo.github.io"
+    const val CLIENT_VERSION = "v5.5.0"
 
     // Flags
     var isStarting = true
@@ -68,7 +70,6 @@ object FDPClient {
     lateinit var moduleManager: ModuleManager
     lateinit var commandManager: CommandManager
     lateinit var eventManager: EventManager
-    private lateinit var subscriptions: Subscriptions
     lateinit var fileManager: FileManager
     lateinit var scriptManager: ScriptManager
     lateinit var tipSoundManager: TipSoundManager
@@ -116,7 +117,6 @@ object FDPClient {
         // Initialize managers
         fileManager = FileManager()
         configManager = ConfigManager()
-        subscriptions = Subscriptions()
         eventManager = EventManager()
         commandManager = CommandManager()
         macroManager = MacroManager()
@@ -132,25 +132,13 @@ object FDPClient {
         // Register listeners
         eventManager.registerListener(RotationUtils())
         eventManager.registerListener(ClientFixes)
-        eventManager.registerListener(ClientSpoof())
         eventManager.registerListener(InventoryUtils)
         eventManager.registerListener(BungeeCordSpoof())
-        eventManager.registerListener(ServerSpoof)
         eventManager.registerListener(SessionUtils())
-        eventManager.registerListener(StatisticsUtils())
         eventManager.registerListener(LocationCache())
         eventManager.registerListener(macroManager)
         eventManager.registerListener(combatManager)
-
-        // Load configs
-        fileManager.loadConfigs(
-            fileManager.accountsConfig,
-            fileManager.friendsConfig,
-            fileManager.specialConfig,
-            fileManager.subscriptsConfig,
-            fileManager.hudConfig,
-            fileManager.xrayConfig
-        )
+        eventManager.registerListener(ClientSpoofHandler())
 
         // Load client fonts
         Fonts.loadFonts()
@@ -174,23 +162,19 @@ object FDPClient {
         mainMenu = GuiLaunchOptionSelectMenu()
         hud = HUD.createDefault()
 
+        // Load configs
+        fileManager.loadConfigs(
+            fileManager.accountsConfig,
+            fileManager.friendsConfig,
+            fileManager.specialConfig,
+            fileManager.hudConfig,
+            fileManager.xrayConfig
+        )
+        
         // Run update checker
         if (CLIENT_VERSION != "unknown") {
             thread(block = this::checkUpdate)
         }
-
-        // Load script subscripts
-        ClientUtils.logInfo("Loading Script Subscripts...")
-        fileManager.subscriptsConfig.subscripts.forEach { subscript ->
-            Subscriptions.addSubscribes(ScriptSubscribe(subscript.url, subscript.name))
-        }
-        scriptManager.disableScripts()
-        scriptManager.unloadScripts()
-        Subscriptions.subscribes.forEach { scriptSubscribe ->
-            scriptSubscribe.load()
-        }
-        scriptManager.loadScripts()
-        scriptManager.enableScripts()
 
         // Set title
         ClientUtils.setTitle()

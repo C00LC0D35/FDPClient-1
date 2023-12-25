@@ -6,14 +6,14 @@
 package net.ccbluex.liquidbounce.ui.client.hud.element.elements
 
 import net.ccbluex.liquidbounce.FDPClient
-import net.ccbluex.liquidbounce.font.CFontRenderer
-import net.ccbluex.liquidbounce.font.FontLoaders
+import net.ccbluex.liquidbounce.ui.font.cf.CFontRenderer
+import net.ccbluex.liquidbounce.ui.font.cf.FontLoaders
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.ui.client.hud.element.*
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.render.*
 import net.ccbluex.liquidbounce.ui.font.Fonts
-import net.ccbluex.liquidbounce.features.value.*
+import net.ccbluex.liquidbounce.value.*
 import net.ccbluex.liquidbounce.utils.render.shadowRenderUtils
 import net.minecraft.util.ResourceLocation
 import net.minecraft.client.renderer.GlStateManager
@@ -111,15 +111,15 @@ class Notification(
         index: Int, font: CFontRenderer, alpha: Int, blurRadius: Float, x: Float, y: Float, scale: Float,
         contentShadow: Boolean,
         titleShadow: Boolean,
-        motionBlur: Boolean, 
+        motionBlur: Boolean,
         whiteText: Boolean,
         modeColored: Boolean,
         parent: Notifications.Companion
         
     ): Boolean {
         this.width = 100.coerceAtLeast(
-            font.getStringWidth(content)
-                .coerceAtLeast(font.getStringWidth(title)) + 15
+            (font.getStringWidth(content)
+                .coerceAtLeast(font.getStringWidth(title)) + 15).toInt()
         )
         val realY = -(index + 1) * height
         val nowTime = System.currentTimeMillis()
@@ -242,6 +242,8 @@ class Notification(
                         RenderUtils.drawRoundedCornerRect(4F, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
                         RenderUtils.drawRoundedCornerRect(5F, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
                     }
+
+                    FadeState.END -> TODO()
                 }
             } else {
                 RenderUtils.drawRoundedCornerRect(0F + 3f, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
@@ -255,7 +257,7 @@ class Notification(
             return false
         }
         
-        if (style.equals("FDP")) {
+        if (style == "FDP") {
 
             if (blurRadius != 0f) {
                 BlurUtils.draw(4 + (x + transX).toFloat() * scale, (y + transY).toFloat() * scale, (width * scale), (27f - 5f) * scale, blurRadius)
@@ -279,6 +281,8 @@ class Notification(
                         RenderUtils.drawRoundedCornerRect(4F, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
                         RenderUtils.drawRoundedCornerRect(5F, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
                     }
+
+                    FadeState.END -> TODO()
                 }
             } else {
                 RenderUtils.drawRoundedCornerRect(0F + 3f, 0F, width.toFloat() + 5f, 27f - 5f, 2f, colors.rgb)
@@ -381,22 +385,26 @@ class Notification(
                 if(nTypeError){
                     RenderUtils.drawRoundedRect(-x + 9 + textLength, 1f, kek - 1, -28F - 1, 0F, Color(115,69,75).rgb)
                     RenderUtils.drawRoundedRect(-x + 8 + textLength, 0f, kek, -28F, 0F, Color(89,61,65).rgb)
-                    FontLoaders.M16.DisplayFont2(FontLoaders.M16,title, -x + 6, -25F, Color(249,130,108).rgb, true)
+                    FontLoaders.M16.DisplayFont2(
+                        FontLoaders.M16,title, -x + 6, -25F, Color(249,130,108).rgb, true)
                 }
                 if(nTypeInfo) {
                     RenderUtils.drawRoundedRect(-x + 9 + textLength,  1f, kek - 1, -28F - 1, 0F, Color(70,94,115).rgb)
                     RenderUtils.drawRoundedRect(-x + 8 + textLength, 0f, kek, -28F, 0F, Color(61,72,87).rgb)
-                    FontLoaders.M16.DisplayFont2(FontLoaders.M16,title, -x + 6, -25F, Color(119,145,147).rgb, true)
+                    FontLoaders.M16.DisplayFont2(
+                        FontLoaders.M16,title, -x + 6, -25F, Color(119,145,147).rgb, true)
                 }
                 if(nTypeSuccess){
                     RenderUtils.drawRoundedRect(-x + 9 + textLength, 1f, kek - 1, -28F - 1, 0F, Color(67,104,67).rgb)
                     RenderUtils.drawRoundedRect(-x + 8 + textLength, 0f, kek, -28F, 0F, Color(55,78,55).rgb)
-                    FontLoaders.M16.DisplayFont2(FontLoaders.M16,title, -x + 6, -25F, Color(10,142,2).rgb, true)
+                    FontLoaders.M16.DisplayFont2(
+                        FontLoaders.M16,title, -x + 6, -25F, Color(10,142,2).rgb, true)
                 }
                 if(nTypeWarning){
                     RenderUtils.drawRoundedRect(-x + 9 + textLength, 1f, kek - 1, -28F - 1, 0F, Color(103,103,63).rgb)
                     RenderUtils.drawRoundedRect(-x + 8 + textLength, 0f, kek, -28F, 0F, Color(80,80,57).rgb)
-                    FontLoaders.M16.DisplayFont2(FontLoaders.M16,title, -x + 6, -25F, Color(175,163,0).rgb, true)
+                    FontLoaders.M16.DisplayFont2(
+                        FontLoaders.M16,title, -x + 6, -25F, Color(175,163,0).rgb, true)
                 }
 
                 Stencil.erase(true)

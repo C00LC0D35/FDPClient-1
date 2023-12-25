@@ -12,11 +12,12 @@ import net.ccbluex.liquidbounce.event.UpdateEvent
 import net.ccbluex.liquidbounce.event.PacketEvent
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
-import net.ccbluex.liquidbounce.features.module.modules.render.Breadcrumbs
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.features.module.modules.visual.Breadcrumbs
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.IntegerValue
 import net.ccbluex.liquidbounce.utils.BlinkUtils
 import net.ccbluex.liquidbounce.utils.PacketUtils
 import net.minecraft.client.entity.EntityOtherPlayerMP
@@ -26,7 +27,8 @@ import java.util.concurrent.LinkedBlockingQueue
 import org.lwjgl.opengl.GL11
 import java.util.*
 
-class Blink : Module(name = "Blink", category = ModuleCategory.PLAYER) {
+@ModuleInfo(name = "Blink", category = ModuleCategory.PLAYER)
+object Blink : Module() {
     
     private val outgoingValue = BoolValue("OutGoing", true)
     private val inboundValue = BoolValue("Inbound", false)

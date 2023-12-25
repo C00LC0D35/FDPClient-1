@@ -5,10 +5,10 @@ import net.ccbluex.liquidbounce.event.UpdateEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.flys.FlyMode
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.FloatValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
-import net.ccbluex.liquidbounce.features.value.ListValue
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,7 +34,7 @@ class OldMatrixDamageFly : FlyMode("OldMatrixDamage") {
 
     override fun onEnable() {
         if (warn.get())
-            ClientUtils.displayChatMessage("§8[§c§lMatrix-Dmg-Fly§8] §aGetting damage from other entities (players, arrows, snowballs, eggs...) is required to bypass.")
+            ClientUtils.displayChatMessage("§8[§c§lMatrix-Dmg-Flight§8] §aGetting damage from other entities (players, arrows, snowballs, eggs...) is required to bypass.")
         velocitypacket = false
         packetymotion = 0.0
         tick = 0

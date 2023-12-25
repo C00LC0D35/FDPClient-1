@@ -8,14 +8,15 @@ package net.ccbluex.liquidbounce.features.module.modules.movement;
 import net.ccbluex.liquidbounce.event.*;
 import net.ccbluex.liquidbounce.features.module.Module;
 import net.ccbluex.liquidbounce.features.module.ModuleCategory;
-import net.ccbluex.liquidbounce.features.value.ListValue;
+import net.ccbluex.liquidbounce.features.module.ModuleInfo;
+import net.ccbluex.liquidbounce.value.ListValue;
 import net.ccbluex.liquidbounce.ui.font.Fonts;
 import net.ccbluex.liquidbounce.utils.MovementUtils;
 import net.ccbluex.liquidbounce.utils.PacketUtils;
 import net.ccbluex.liquidbounce.utils.render.RenderUtils;
-import net.ccbluex.liquidbounce.features.value.BoolValue;
-import net.ccbluex.liquidbounce.features.value.FloatValue;
-import net.ccbluex.liquidbounce.features.value.IntegerValue;
+import net.ccbluex.liquidbounce.value.BoolValue;
+import net.ccbluex.liquidbounce.value.FloatValue;
+import net.ccbluex.liquidbounce.value.IntegerValue;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemBow;
@@ -29,12 +30,8 @@ import net.minecraft.util.EnumFacing;
 
 import java.awt.*;
 
+@ModuleInfo(name = "BowJump", category = ModuleCategory.MOVEMENT)
 public class BowJump extends Module {
-
-    private static ModuleCategory category = ModuleCategory.MOVEMENT;
-    public BowJump() {
-        super("BowJump", category = ModuleCategory.MOVEMENT);
-    }
 
     private final BoolValue hypixelBypassValue = new BoolValue("hypixelBypass", true);
     private final ListValue modeValue = new ListValue("BoostMode", new String[] {"Strafe","SpeedInAir"}, "Strafe");

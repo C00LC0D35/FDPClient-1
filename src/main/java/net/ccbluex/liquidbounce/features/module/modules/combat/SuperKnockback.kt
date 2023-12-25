@@ -6,25 +6,27 @@
 package net.ccbluex.liquidbounce.features.module.modules.combat
 
 import net.ccbluex.liquidbounce.event.AttackEvent
-import net.ccbluex.liquidbounce.event.PacketEvent
 import net.ccbluex.liquidbounce.event.UpdateEvent
 import net.ccbluex.liquidbounce.event.EventTarget
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
+import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import net.ccbluex.liquidbounce.utils.RotationUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
-import net.ccbluex.liquidbounce.features.value.ListValue
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.client.settings.GameSettings
 import net.minecraft.network.play.client.C0BPacketEntityAction
-import net.minecraft.network.play.client.C03PacketPlayer.*
 
-object SuperKnockback : Module(name = "SuperKnockback", category = ModuleCategory.COMBAT) {
+@ModuleInfo(name = "SuperKnockback", category = ModuleCategory.COMBAT)
+class SuperKnockback : Module() {
+
     private val hurtTimeValue = IntegerValue("HurtTime", 10, 0, 10)
-    private val modeValue = ListValue("Mode", arrayOf("Wtap", "Legit", "Silent", "SprintPacket", "SneakPacket"), "Silent")
+    private val modeValue = ListValue("Mode", arrayOf("Wtap", "Legit", "LegitSneak", "Silent", "SprintReset", "SneakPacket"), "Silent")
     private val onlyMoveValue = BoolValue("OnlyMove", true)
     private val onlyMoveForwardValue = BoolValue("OnlyMoveForward", true). displayable { onlyMoveValue.get() }
     private val onlyGroundValue = BoolValue("OnlyGround", false)
@@ -48,21 +50,9 @@ object SuperKnockback : Module(name = "SuperKnockback", category = ModuleCategor
                 
             when (modeValue.get().lowercase()) {
                 
-                "wtap" ->  ticks = 2
-                
-                
-                "legit" -> {
-                    ticks = 2
-                }
-                
-                "silent" -> {
-                    ticks = 1
-                }
+                "wtap", "legit", "legitsneak" ->  ticks = 2
 
-                "SprintReset" -> {
-                    if (mc.thePlayer.isSprinting) {
-                        mc.thePlayer.isSprinting = true
-                    }
+                "sprintreset" -> {
                     mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING))
                 }
                 
@@ -83,16 +73,16 @@ object SuperKnockback : Module(name = "SuperKnockback", category = ModuleCategor
     
     @EventTarget
     fun onUpdate(event: UpdateEvent) {
-        if (modeValue.equals("Legit")) {
+        if (modeValue.equals("Wtap")) {
             if (ticks == 2) {
                 mc.gameSettings.keyBindForward.pressed = false
                 ticks = 1
             } else if (ticks == 1) {
-                mc.gameSettings.keyBindForward.pressed = true
+                mc.gameSettings.keyBindForward.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindForward)
                 ticks = 0
             }
         }
-        if (modeValue.equals("Wtap")) {
+        if (modeValue.equals("Legit")) {
             if (ticks == 2) {
                 mc.thePlayer.isSprinting = false
                 ticks = 1
@@ -101,6 +91,17 @@ object SuperKnockback : Module(name = "SuperKnockback", category = ModuleCategor
                 ticks = 0
             }
         }
+        if (modeValue.equals("LegitSneak")) {
+            if (ticks == 2) {
+                mc.gameSettings.keyBindSneak.pressed = true
+                ticks = 1
+            } else if (ticks == 1) {
+                mc.gameSettings.keyBindSneak.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindSneak)
+                ticks = 0
+            }
+        }
+
+        
         if (modeValue.equals("Silent")) {
             if (ticks == 1) {
                 mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING))

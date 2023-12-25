@@ -6,7 +6,7 @@
 package net.ccbluex.liquidbounce.utils.render;
 
 import net.ccbluex.liquidbounce.FDPClient;
-import net.ccbluex.liquidbounce.features.module.modules.render.KillESP;
+import net.ccbluex.liquidbounce.features.module.modules.visual.KillESP;
 import net.ccbluex.liquidbounce.injection.access.StaticStorage;
 import net.ccbluex.liquidbounce.ui.font.Fonts;
 import net.ccbluex.liquidbounce.utils.MinecraftInstance;
@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.*;
 
 import static java.lang.Math.*;
-import static net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.novoline.AnimationUtil.getAnimationState;
 import static net.minecraft.client.renderer.GlStateManager.disableBlend;
 import static net.minecraft.client.renderer.GlStateManager.enableTexture2D;
 import static org.lwjgl.opengl.GL11.*;
@@ -59,6 +58,14 @@ public final class RenderUtils extends MinecraftInstance {
     private static final Map<String, Map<Integer, Boolean>> glCapMap = new HashMap<>();
 
     public static int deltaTime;
+
+    public static int width() {
+        return new ScaledResolution(Minecraft.getMinecraft()).getScaledWidth();
+    }
+
+    public static int height() {
+        return new ScaledResolution(Minecraft.getMinecraft()).getScaledHeight();
+    }
 
     private static final int[] DISPLAY_LISTS_2D = new int[4];
 
@@ -2158,6 +2165,24 @@ public final class RenderUtils extends MinecraftInstance {
         glScissor((int) (x * factor), (int) ((scaledResolution.getScaledHeight() - y2) * factor), (int) ((x2 - x) * factor), (int) ((y2 - y) * factor));
     }
 
+    public static void drawUnfilledCircle(double x, double y, float radius, float lineWidth, int color) {
+        GLUtil.setup2DRendering();
+        color(color);
+        glLineWidth(lineWidth);
+        glEnable(GL_LINE_SMOOTH);
+        glBegin(GL_POINT_BIT);
+
+        int i = 0;
+        while (i <= 360) {
+            glVertex2d(x + Math.sin((double) i * 3.141526 / 180.0) * (double) radius, y + Math.cos((double) i * 3.141526 / 180.0) * (double) radius);
+            ++i;
+        }
+
+        glEnd();
+        glDisable(GL_LINE_SMOOTH);
+        GLUtil.end2DRendering();
+    }
+
     public static void resetCaps(final String scale) {
         if(!glCapMap.containsKey(scale)) {
             return;
@@ -2365,6 +2390,55 @@ public final class RenderUtils extends MinecraftInstance {
         worldRenderer.pos(aa.maxX, aa.maxY, aa.maxZ).endVertex();
         worldRenderer.pos(aa.maxX, aa.minY, aa.maxZ).endVertex();
         tessellator.draw();
+    }
+
+    public static void drawRound(float x, float y, float width, float height, float radius, Color color) {
+        RenderUtils.drawRoundCustom(x, y, width, height, radius, color, true, true, true, true);
+    }
+    public static void drawRoundCustom(float x, float y, float width, float height, float radius, Color c, boolean leftTop, boolean leftBottom, boolean rightBottom, boolean rightTop) {
+        GL11.glPushAttrib(0);
+        GL11.glScaled(0.5D, 0.5D, 0.5D);
+        GlStateManager.enableBlend();
+        x *= 2D;
+        y *= 2D;
+        width *= 2D;
+        height *= 2D;
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        ColorUtils.clearColor();
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        GL11.glBegin(GL11.GL_POLYGON);
+        ColorUtils.setColor(c.getRGB());
+        int i;
+
+        if (leftTop)
+            for (i = 0; i <= 90; i += 3)
+                GL11.glVertex2d(x + radius + Math.sin(i * Math.PI / 180D) * radius * -1D, y + radius + Math.cos(i * Math.PI / 180D) * radius * -1D);
+        else GL11.glVertex2d(x, y);
+
+        if (leftBottom)
+            for (i = 90; i <= 180; i += 3)
+                GL11.glVertex2d(x + radius + Math.sin(i * Math.PI / 180D) * radius * -1D, y + height - radius + Math.cos(i * Math.PI / 180D) * radius * -1D);
+        else GL11.glVertex2d(x, y + height);
+
+        if (rightBottom)
+            for (i = 0; i <= 90; i += 3)
+                GL11.glVertex2d(x + width - radius + Math.sin(i * Math.PI / 180D) * radius, y + height - radius + Math.cos(i * Math.PI / 180D) * radius);
+        else GL11.glVertex2d(x + width, y + height);
+
+        if (rightTop)
+            for (i = 90; i <= 180; i += 3)
+                GL11.glVertex2d(x + width - radius + Math.sin(i * Math.PI / 180D) * radius, y + radius + Math.cos(i * Math.PI / 180D) * radius);
+        else GL11.glVertex2d(x + width, y);
+
+        GL11.glEnd();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GL11.glDisable(GL11.GL_LINE_SMOOTH);
+        GlStateManager.disableBlend();
+        GL11.glScaled(2D, 2D, 2D);
+        GL11.glPopAttrib();
+        ColorUtils.clearColor();
     }
 
     public static void originalRoundedRect(float paramXStart, float paramYStart, float paramXEnd, float paramYEnd, float radius, int color) {
