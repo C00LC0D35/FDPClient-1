@@ -27,10 +27,10 @@ import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.utils.timer.TickTimer
 import net.ccbluex.liquidbounce.utils.timer.TimeUtils
 import net.ccbluex.liquidbounce.utils.MovementUtils
-import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.features.value.FloatValue
-import net.ccbluex.liquidbounce.features.value.IntegerValue
-import net.ccbluex.liquidbounce.features.value.ListValue
+import net.ccbluex.liquidbounce.value.BoolValue
+import net.ccbluex.liquidbounce.value.FloatValue
+import net.ccbluex.liquidbounce.value.IntegerValue
+import net.ccbluex.liquidbounce.value.ListValue
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.minecraft.block.BlockAir
 import net.minecraft.client.gui.ScaledResolution
@@ -784,16 +784,15 @@ class Scaffold : Module() {
                 }
             }
             "verus" -> {
-                mc.thePlayer.setPosition(mc.thePlayer.posX, (mc.thePlayer.posY * 2).roundToInt().toDouble() / 2, mc.thePlayer.posZ)
-                if (mc.thePlayer.ticksExisted % 2 == 0) {
-                    mc.thePlayer.motionY = 0.5
-                    mc.timer.timerSpeed = 0.8f
-                    doSpoof = false
-                }else{
-                    mc.timer.timerSpeed = 1.33f
-                    mc.thePlayer.motionY = 0.0
+                if (!mc.thePlayer.onGround) {
+                    mc.thePlayer.motionY = -0.0784000015258789
+                    mc.thePlayer.setPosition(mc.thePlayer.posX, truncate(mc.thePlayer.posY), mc.thePlayer.posZ)
+                }
+                if (mc.thePlayer.onGround) { 
+                    mc.thePlayer.motionY = -0.0784000015258789
+                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1, mc.thePlayer.posZ)
                     mc.thePlayer.onGround = true
-                    doSpoof = true
+                    mc.thePlayer.motionY = 0.41999998688698
                 }
             }
             "aac4jump" -> {
